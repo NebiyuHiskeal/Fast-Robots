@@ -1,0 +1,106 @@
+2024-01-23 16:27:56,374 | MainThread   | [DEBUG   ] | <module>            |: debug
+2024-01-23 16:27:56,374 | MainThread   | [INFO    ] | <module>            |: info
+2024-01-23 16:27:56,375 | MainThread   | [WARNING ] | <module>            |: warning
+2024-01-23 16:27:56,376 | MainThread   | [ERROR   ] | <module>            |: error
+2024-01-23 16:27:56,377 | MainThread   | [CRITICAL] | <module>            |: critical
+2024-01-23 16:40:24,099 | MainThread   | [DEBUG   ] | __init__            |: Python Info: sys.version_info(major=3, minor=9, micro=0, releaselevel='final', serial=0)
+2024-01-23 16:40:24,099 | MainThread   | [DEBUG   ] | __init__            |: System Info: macOS-10.16-x86_64-i386-64bit
+2024-01-23 16:40:24,100 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: C0:C2:8A:89:98:08
+2024-01-23 16:40:25,776 | MainThread   | [ERROR   ] | _connect            |: Bluetooth device is turned off
+2024-01-23 16:40:26,798 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 16:40:26,802 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: C0:C2:8A:89:98:08
+2024-01-23 16:40:27,813 | MainThread   | [ERROR   ] | _connect            |: Bluetooth device is turned off
+2024-01-23 16:40:28,822 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 16:40:28,826 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: C0:C2:8A:89:98:08
+2024-01-23 16:40:29,834 | MainThread   | [ERROR   ] | _connect            |: Bluetooth device is turned off
+2024-01-23 16:40:30,845 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 16:40:40,254 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: C0:C2:8A:89:98:08
+2024-01-23 16:40:50,281 | MainThread   | [ERROR   ] | _connect            |: Device with address C0:C2:8A:89:98:08 was not found
+2024-01-23 16:40:51,288 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 16:40:51,293 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: C0:C2:8A:89:98:08
+2024-01-23 16:41:01,333 | MainThread   | [ERROR   ] | _connect            |: Device with address C0:C2:8A:89:98:08 was not found
+2024-01-23 16:41:02,342 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 16:41:02,344 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: C0:C2:8A:89:98:08
+2024-01-23 16:41:12,379 | MainThread   | [ERROR   ] | _connect            |: Device with address C0:C2:8A:89:98:08 was not found
+2024-01-23 16:41:13,384 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 17:03:41,572 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: c0:42:f5:78:8d:49
+2024-01-23 17:03:51,602 | MainThread   | [ERROR   ] | _connect            |: Device with address c0:42:f5:78:8d:49 was not found
+2024-01-23 17:03:52,607 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 17:03:52,612 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: c0:42:f5:78:8d:49
+2024-01-23 17:04:02,654 | MainThread   | [ERROR   ] | _connect            |: Device with address c0:42:f5:78:8d:49 was not found
+2024-01-23 17:04:03,661 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 17:04:03,665 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: c0:42:f5:78:8d:49
+2024-01-23 17:04:13,705 | MainThread   | [ERROR   ] | _connect            |: Device with address c0:42:f5:78:8d:49 was not found
+2024-01-23 17:04:14,712 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 17:04:23,710 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: c0:42:f5:78:8d:49
+2024-01-23 17:04:33,736 | MainThread   | [ERROR   ] | _connect            |: Device with address c0:42:f5:78:8d:49 was not found
+2024-01-23 17:04:34,744 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 17:04:34,748 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: c0:42:f5:78:8d:49
+2024-01-23 17:04:44,789 | MainThread   | [ERROR   ] | _connect            |: Device with address c0:42:f5:78:8d:49 was not found
+2024-01-23 17:04:45,797 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 17:04:45,801 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: c0:42:f5:78:8d:49
+2024-01-23 17:04:55,841 | MainThread   | [ERROR   ] | _connect            |: Device with address c0:42:f5:78:8d:49 was not found
+2024-01-23 17:04:56,849 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 17:05:10,089 | MainThread   | [INFO    ] | exit_handler        |: Exiting...
+2024-01-23 17:05:10,091 | MainThread   | [WARNING ] | exit_handler        |: Could not disconnect before exiting
+2024-01-23 17:05:10,094 | MainThread   | [WARNING ] | exit_handler        |: Not connected to a BLE device
+2024-01-23 17:05:24,218 | MainThread   | [DEBUG   ] | __init__            |: Python Info: sys.version_info(major=3, minor=9, micro=0, releaselevel='final', serial=0)
+2024-01-23 17:05:24,218 | MainThread   | [DEBUG   ] | __init__            |: System Info: macOS-10.16-x86_64-i386-64bit
+2024-01-23 17:05:24,218 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: C0:42:F5:78:8D:49
+2024-01-23 17:05:34,345 | MainThread   | [ERROR   ] | _connect            |: Device with address C0:42:F5:78:8D:49 was not found
+2024-01-23 17:05:35,354 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 17:05:35,359 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: C0:42:F5:78:8D:49
+2024-01-23 17:05:45,417 | MainThread   | [ERROR   ] | _connect            |: Device with address C0:42:F5:78:8D:49 was not found
+2024-01-23 17:05:46,426 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 17:05:46,430 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: C0:42:F5:78:8D:49
+2024-01-23 17:05:56,489 | MainThread   | [ERROR   ] | _connect            |: Device with address C0:42:F5:78:8D:49 was not found
+2024-01-23 17:05:57,493 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 17:06:50,485 | MainThread   | [INFO    ] | exit_handler        |: Exiting...
+2024-01-23 17:06:50,489 | MainThread   | [WARNING ] | exit_handler        |: Could not disconnect before exiting
+2024-01-23 17:06:50,490 | MainThread   | [WARNING ] | exit_handler        |: Not connected to a BLE device
+2024-01-23 17:06:59,992 | MainThread   | [DEBUG   ] | __init__            |: Python Info: sys.version_info(major=3, minor=9, micro=0, releaselevel='final', serial=0)
+2024-01-23 17:06:59,992 | MainThread   | [DEBUG   ] | __init__            |: System Info: macOS-10.16-x86_64-i386-64bit
+2024-01-23 17:06:59,992 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: C0:42:F5:78:8D:49
+2024-01-23 17:07:10,117 | MainThread   | [ERROR   ] | _connect            |: Device with address C0:42:F5:78:8D:49 was not found
+2024-01-23 17:07:11,125 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 17:07:11,130 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: C0:42:F5:78:8D:49
+2024-01-23 17:07:21,189 | MainThread   | [ERROR   ] | _connect            |: Device with address C0:42:F5:78:8D:49 was not found
+2024-01-23 17:07:22,195 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 17:07:22,199 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: C0:42:F5:78:8D:49
+2024-01-23 17:07:32,259 | MainThread   | [ERROR   ] | _connect            |: Device with address C0:42:F5:78:8D:49 was not found
+2024-01-23 17:07:33,265 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 17:07:47,017 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: c0:42:f5:78:8d:49
+2024-01-23 17:07:57,057 | MainThread   | [ERROR   ] | _connect            |: Device with address c0:42:f5:78:8d:49 was not found
+2024-01-23 17:07:58,065 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 17:07:58,070 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: c0:42:f5:78:8d:49
+2024-01-23 17:08:08,128 | MainThread   | [ERROR   ] | _connect            |: Device with address c0:42:f5:78:8d:49 was not found
+2024-01-23 17:08:09,136 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 17:08:09,141 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: c0:42:f5:78:8d:49
+2024-01-23 17:08:19,201 | MainThread   | [ERROR   ] | _connect            |: Device with address c0:42:f5:78:8d:49 was not found
+2024-01-23 17:08:20,208 | MainThread   | [WARNING ] | connect             |: Attempting to connect again...
+2024-01-23 17:08:40,836 | MainThread   | [INFO    ] | exit_handler        |: Exiting...
+2024-01-23 17:08:40,836 | MainThread   | [INFO    ] | exit_handler        |: Exiting...
+2024-01-23 17:08:40,840 | MainThread   | [WARNING ] | exit_handler        |: Could not disconnect before exiting
+2024-01-23 17:08:40,840 | MainThread   | [WARNING ] | exit_handler        |: Could not disconnect before exiting
+2024-01-23 17:08:40,843 | MainThread   | [WARNING ] | exit_handler        |: Not connected to a BLE device
+2024-01-23 17:08:40,843 | MainThread   | [WARNING ] | exit_handler        |: Not connected to a BLE device
+2024-01-23 17:08:48,089 | MainThread   | [DEBUG   ] | __init__            |: Python Info: sys.version_info(major=3, minor=9, micro=0, releaselevel='final', serial=0)
+2024-01-23 17:08:48,090 | MainThread   | [DEBUG   ] | __init__            |: System Info: macOS-10.16-x86_64-i386-64bit
+2024-01-23 17:08:48,090 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: c0:42:f5:78:8d:49
+2024-01-23 17:08:50,793 | MainThread   | [INFO    ] | _connect            |: Connected to c0:42:f5:78:8d:49
+2024-01-23 17:09:11,750 | MainThread   | [INFO    ] | exit_handler        |: Exiting...
+2024-01-23 17:09:11,758 | MainThread   | [INFO    ] | disconnect_handler  |: Disconnected from 2C7E7BE8-D5AB-1F34-3582-913588F90853
+2024-01-23 17:09:11,760 | MainThread   | [INFO    ] | exit_handler        |: Gracefully Exiting
+2024-01-23 23:37:43,269 | MainThread   | [DEBUG   ] | __init__            |: Python Info: sys.version_info(major=3, minor=9, micro=0, releaselevel='final', serial=0)
+2024-01-23 23:37:43,269 | MainThread   | [DEBUG   ] | __init__            |: System Info: macOS-10.16-x86_64-i386-64bit
+2024-01-23 23:37:43,270 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: c0:42:f5:78:8d:49
+2024-01-23 23:39:04,069 | MainThread   | [INFO    ] | exit_handler        |: Exiting...
+2024-01-23 23:39:04,072 | MainThread   | [WARNING ] | exit_handler        |: Could not disconnect before exiting
+2024-01-23 23:39:04,074 | MainThread   | [WARNING ] | exit_handler        |: Not connected to a BLE device
+2024-01-23 23:39:10,109 | MainThread   | [DEBUG   ] | __init__            |: Python Info: sys.version_info(major=3, minor=9, micro=0, releaselevel='final', serial=0)
+2024-01-23 23:39:10,110 | MainThread   | [DEBUG   ] | __init__            |: System Info: macOS-10.16-x86_64-i386-64bit
+2024-01-23 23:39:10,110 | MainThread   | [INFO    ] | _connect            |: Looking for Artemis Nano Peripheral Device: c0:42:f5:78:8d:49
+2024-01-23 23:39:12,841 | MainThread   | [INFO    ] | _connect            |: Connected to c0:42:f5:78:8d:49
+2024-01-23 23:46:17,885 | MainThread   | [INFO    ] | exit_handler        |: Exiting...
+2024-01-23 23:46:17,892 | MainThread   | [INFO    ] | disconnect_handler  |: Disconnected from 2C7E7BE8-D5AB-1F34-3582-913588F90853
+2024-01-23 23:46:17,893 | MainThread   | [INFO    ] | exit_handler        |: Gracefully Exiting
