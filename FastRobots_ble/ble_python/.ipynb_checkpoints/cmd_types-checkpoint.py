@@ -7,3 +7,7 @@ class CMD(Enum):
     ECHO = 3
     DANCE = 4
     SET_VEL = 5
+    GET_TIME_MILLIS = 6
+    SAMPLE_TIME = 7
+    SEND_TIME_DATA = 8
+    GET_TEMP_READINGS = 9

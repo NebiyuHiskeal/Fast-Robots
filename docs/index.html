@@ -84,7 +84,7 @@
     </section> -->
     <!-- About-->
     <section class="page-section" id="about">
-        <div class="container">
+        <div class="container">                         
             <div class="text-center">
                 <h2 class="section-heading text-uppercase">About</h2>
                 <h3 class="section-subheading text-muted">Hello, my name is Nebiyu Hiskeal. I'm a junior CS major in
@@ -116,7 +116,7 @@
                             <img class="img-fluid" src="assets/img/portfolio/Lab1.jpg" alt="..." />
                         </a>
                         <div class="portfolio-caption">
-                            <div class="portfolio-caption-heading">Lab 0 + 1: Setup and Bluetooth</div>
+                            <div class="portfolio-caption-heading">Lab 1 + 2: Setup and Bluetooth</div>
                             <div class="portfolio-caption-subheading text-muted">Setting up the Artemis Board and
                                 connecting it to my laptop via bluetooth</div>
                         </div>
@@ -208,9 +208,159 @@
                         <div class="col-lg-8">
                             <div class="modal-body">
                                 <!-- Project details-->
+                                <style>p{text-align: left};</style>
+                                <!-- <style>h3{text-align: left};</style>                                 -->
                                 <h2 class="text-uppercase">Setup and Bluetooth Connection</h2>
                                 <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/Lab1.jpg" alt="..." />
-                                <p>Description to be done after the lab is completed</p>
+                                <div>
+                                    <p><h2 class="text-decoration-underline">Lab 1</h2></p>
+                                    <p>The setup for this lab required that I install the needed Artemis libraries and that the examples 
+                                        ran as expected. In order for the examples to work I had to raise the baud rate to 115200.</p>
+                                    <div>
+                                        <p><h3 class="text-uppercase">BLINK</h3></p>
+                                        <p> The first example was a simple program that caused the LED on the board to blink repeatedly and 
+                                            it worked as expected.
+                                        </p>
+                                        <iframe width="560" height="315" src="https://youtube.com/embed/ol3SiPKoz9M" frameborder="0"></iframe>
+                                    </div>
+                                    <div>
+                                        <p><h3 class="text-uppercase">Serial</h3></p>
+                                        <p> The next example tested that serial communication was working with a simple echo program, which
+                                            returned the inputs as expected.
+                                        </p>
+                                        <iframe width="560" height="315" src="https://youtube.com/embed/XNjXetplpwc" frameborder="0"></iframe>
+                                    </div>
+                                    <div>
+                                        <p><h3 class="text-uppercase">thermometer</h3></p>
+                                        <p> This example tested the temperature reading on the board. As the video demonstrates, the example
+                                            runs as expected - the temperature reading increases from about 32400 to 33000 when held in my warm
+                                            hands, and decreases back to about 32400 when blown on.
+                                        </p>
+                                        <iframe width="560" height="315" src="https://youtube.com/embed/3xEHU-ltd5A" frameborder="0"></iframe>
+                                    </div>
+                                    <div>
+                                        <p><h3 class="text-uppercase">microphone</h3></p>
+                                        <p> In this example the test worked on the microphone in the chip. It again gave the expected results and the 
+                                            frequency reading increased when I wistled and was otherwise reading 0 besides occasional background noise.
+                                        </p>
+                                        <iframe width="560" height="315" src="https://youtube.com/embed/vy8vqE-HYcE" frameborder="0"></iframe>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p><h2 class="text-decoration-underline">Lab 2</h2></p>
+                                    <div>
+                                        <h3>Prelab</h3>
+                                        <p>To begin we needed to make a python virtual environment and get Jupyter lab working.
+                                            I experienced a lot of issues with python configurations and with getting Jupyter lab to work.
+                                            The solution ended up being moving the location of my python instillations, deleting the older versions,
+                                            and running the Jupyter lab command with the `--no-browser` option to prevent it from crashing. Once this was
+                                            done and the codebase was downloaded, I could check that it had worked successfully by running burning the 
+                                            sketch onto the board and observing the MAC address being printed out.
+                                        </p>
+                                        <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab1/mac_broadcast.jpg" />
+                                        <p>The codebase uses a UUID and the MAC address of the board to facilitate connection between the board and laptop.
+                                            They are used as identifiers so the board and computer know they are connecting to the correct device.
+                                            The base makes use of BLECharacteristics to send messages (strings) between the board and laptop.
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <h3>Lab Tasks</h3>
+                                        <div>
+                                            <h4 class="text-start">Configurations</h4>
+                                            <p>The configuration required that I generate a new UUID, so my devices could identify each other among 
+                                                all the other devices searching for bluetooth connection. So I generated a new one and, in connections.yaml,
+                                                updated the ble_service field to be the new uuid as well as the artemis_address to be the MAC address that was 
+                                                displayed earlier. I also had to change line 53 in base_ble.py from if AT_LEAST_MAC_OS_12, to if True, in order for things to
+                                                run correctly.
+                                            </p>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab1/Screenshot 2024-02-06 at 2.23.18 AM.png"/>
+                                            <p>The video below demonstrates the demo file running as expected.</p>
+                                            <iframe width="560" height="315" src="https://youtube.com/embed/oBdk-kj4Cpc" frameborder="0"></iframe>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-start">ECHO</h4>
+                                            <p>I implemented the echo command as was recommended in the handout, so the board responds with "Robot says -> [input] :)"
+                                                Because the requirements are very similar to the PING command, I used that as a framework and edited the strings that were appended. 
+                                            </p>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab1/Screenshot 2024-02-06 at 2.51.53 AM.png"/>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab1/Screenshot 2024-02-06 at 2.44.15 AM.png"/>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-start">GET_TIME_MILLIS</h4>
+                                            <p>This command required more to implement because it is not a command that exists yet. To make it a valid command it needed to be added
+                                                to the CMD enum in cmd_types.py, and the CommandTypes enum in ble_arduino.ble, and as a case in handle_command function also in ble_arduino.
+                                            </p>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab1/Screenshot 2024-02-06 at 2.46.37 AM.png"/>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab1/Screenshot 2024-02-06 at 2.46.58 AM.png"/>
+                                            <p>Constructing the string was similar to what happened above and the time was gotten using a built-in function.</p>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab1/Screenshot 2024-02-06 at 2.52.51 AM.png"/>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-start">Notification Handler</h4>
+                                            <p>
+                                                Here I was to create a notification handler which would be called whenever a message was recieved from the board. This is the final form of 
+                                                my handler that handles all the commands from this lab. It will store temperature and time readings in ther own lists as well as storing
+                                                a log of each message recieved in a list, and it prints each message as it recieves it.
+                                            </p>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab1/Screenshot 2024-02-06 at 4.01.55 AM.png"/>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-start">Each Time Efficiency</h4>
+                                            <p>
+                                                This task called for me to have the board send as many messages as it could in, what I decided was, 5 seconds. To accomplish that
+                                                I assigned the sending loop to a command called SAMPLE_TIME. The process for adding this command was the same as for GET_TIME_MILLIS 
+                                                and the function was a loop of that command.
+                                            </p>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab1/Screenshot 2024-02-06 at 3.18.41 AM.png"/>
+                                            <p>
+                                                As the image above shows, the board sent 634 messages in the 5 seconds it was running, meaning it has a transfer rate of about .126 floats per millisecond,
+                                                or .504 Bytes per second.
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-start">All at Once Efficiency</h4>
+                                            <p>
+                                                In this task the board takes some number of time readings (I chose 100), and sends them all at once instead of as they are recorded.
+                                                This command SEND_TIME_DATA required a global list, and even though the measurements are all taken before any are sent, they must 
+                                                still be sent one by one because the BLECharacteristics places a cap on the size of string that we can send. 
+                                            </p>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab1/Screenshot 2024-02-06 at 3.43.36 AM.png"/>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab1/Screenshot 2024-02-06 at 3.44.45 AM.png"/>
+                                            <p>
+                                                As can be seen in the screenshot above, the total time elapsed while the 100 measurements were taken was only 2 milliseconds, meaning it recorded
+                                                at least 50 times per millisecond. So it is obvious that sending measurements as they are taken significantly decreases how often a measurement can be taken,
+                                                so if the focus is on taking as many measurements as possible, say for analyzing what happened while the board is running, then it is better to send data in batches
+                                                so you have as detailed of a dataset as possible.
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-start">Temperature Readings</h4>
+                                            <p>
+                                                To complete this task, taking a temperature measurement for each of the time measurements in the above section, another new 
+                                                command was needed to store and send this data called GET_TEMP_READINGS.
+                                            </p>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab1/Screenshot 2024-02-06 at 3.51.19 AM.png"/>
+                                            <p> As you can see in the picture below, the function seems to be working as intended, but it taking the extra temperature measurement
+                                                does significantly slow the rate of measurements being taken. In the second screenshot you can see that the total time elapsed for 
+                                                100 time and 100 temperature measurements is ~6400 milliseconds.
+                                            </p>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab1/Screenshot 2024-02-06 at 4.03.17 AM.png"/>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab1/Screenshot 2024-02-06 at 4.03.32 AM.png"/>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-start">Discussion</h3>
+                                            <p>
+                                                As mentioned in the last part of the All at Once Efficiency section, sending data in batches allows for a much higher data recording rate. As mentioned 
+                                                above, the batching method allows for around 200 bytes per millisecond to be sent, way more than the .5 bytes gotten sending each individual measurement.
+                                                In this sense it seems like there isn't a reason to be sending measurements as you take them. It is more efficient to take a group of measurements 
+                                                and send them all at once. The amount of data that you allow to build up before sending probably depends on the application you need the data for.
+                                                Like the example I gave earlier, if you are simply doing logging, it is fine to only occasionally send data so that your logs have very precise data,
+                                                but if you need the measurements for calculations critical to the application running, sending in small-medium batches is probably the best way to go.
+                                                Assuming the data rate of purely recording the time (200 bytes per millisecond), it would take a bit under 2 seconds to fill the board's 384kB of RAM.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                                 <!-- <ul class="list-inline">
                                     <li>
                                         <strong>Client:</strong>

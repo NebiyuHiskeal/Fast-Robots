@@ -31,6 +31,9 @@ float tx_float_value = 0.0;
 long interval = 500;
 static long previousMillis = 0;
 unsigned long currentMillis = 0;
+float times[100];
+float temps[100];
+int stored_times = 0;
 //////////// Global Variables ////////////
 
 enum CommandTypes
@@ -41,6 +44,10 @@ enum CommandTypes
     ECHO,
     DANCE,
     SET_VEL,
+    GET_TIME_MILLIS,
+    SAMPLE_TIME,
+    SEND_TIME_DATA,
+    GET_TEMP_READINGS,
 };
 
 void
@@ -125,6 +132,12 @@ handle_command()
             /*
              * Your code goes here.
              */
+            tx_estring_value.clear();
+            tx_estring_value.append("Robot says -> ");
+            tx_estring_value.append(char_arr);
+            tx_estring_value.append(" :)");
+            tx_characteristic_string.writeValue(tx_estring_value.c_str());
+            Serial.println(tx_estring_value.c_str());
             
             break;
         /*
@@ -147,6 +160,57 @@ handle_command()
          * It is safer to validate the command string on the central device (in python)
          * before writing to the characteristic.
          */
+
+        case GET_TIME_MILLIS:
+            tx_estring_value.clear();
+            tx_estring_value.append("T:");
+            tx_estring_value.append((float)millis());
+            tx_characteristic_string.writeValue(tx_estring_value.c_str());
+            Serial.println(tx_estring_value.c_str());
+            break;
+
+        case SAMPLE_TIME:
+            float start;
+            start = (float)millis();
+            while((millis() - start) < 5000) {
+              tx_estring_value.clear();
+              tx_estring_value.append("T:");
+              tx_estring_value.append((float)millis());
+              tx_characteristic_string.writeValue(tx_estring_value.c_str());
+            }
+            break;
+
+        case SEND_TIME_DATA:
+            stored_times = 0;
+            while (stored_times < 100) {
+              times[stored_times] = (float)millis();
+              stored_times += 1;
+            }
+            for(int i = 0; i < 100; i++){
+              tx_estring_value.clear();
+              tx_estring_value.append("T:");
+              tx_estring_value.append(times[i]);
+              tx_characteristic_string.writeValue(tx_estring_value.c_str());
+            }
+            break;
+
+        case GET_TEMP_READINGS:
+            stored_times = 0;
+            while (stored_times < 100) {
+              times[stored_times] = (float)millis();
+              temps[stored_times] = (float)getTempDegC();
+              stored_times += 1;
+            }
+            for(int i = 0; i < 100; i++){
+              tx_estring_value.clear();
+              tx_estring_value.append("Temp: ");
+              tx_estring_value.append(temps[i]);
+              tx_estring_value.append("@Time: ");
+              tx_estring_value.append(times[i]);
+              tx_characteristic_string.writeValue(tx_estring_value.c_str());
+            }
+            break;
+
         default:
             Serial.print("Invalid Command Type: ");
             Serial.println(cmd_type);
