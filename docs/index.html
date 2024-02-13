@@ -428,22 +428,28 @@
                                     <iframe width="560" height="315" src="https://youtube.com/embed/P9jFdXRJSGQ" frameborder="0"></iframe>
                                     <div class="text-start">
                                         <h2>Accelerometer</h2>
-                                        <p>
-                                            To test the accuracy and noise of the accelerometer I made a new command to collect 200 pieces of data and 
-                                            measured the pitch (first) and roll (second) with a range of -90 -> 90º using the equations below. Included 
-                                            with a graph of the two is the fourier transform frequency graph.
-                                        </p>
-                                        <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 12.29.33 PM.png" alt="..."
-                                        width="500"/>
-                                        <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 12.41.10 PM.png" alt="..."/>
-                                        <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 12.37.32 PM.png" alt="..."/>
-                                        <p>
-                                            I got these measurements by rotating the board on its edge on the table, which is why the measurements don't go exactly to 90.
-                                            Below is another graph of pitch readings, but this time without moving the board so that noise is more clear. It also seems that 
-                                            the high spike of high frequency data in the previous two graphs was caused by the way I was moving the board as it is not present here.
-                                            
-                                        </p>
-                                        <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 12.51.38 PM.png" alt="..."/>
+                                        <div>
+                                            <p>
+                                                To test the accuracy and noise of the accelerometer I made a new command to collect 200 pieces of data and 
+                                                measured the pitch (first) and roll (second) with a range of -90 -> 90º using the equations below. Included 
+                                                with a graph of the two is the fourier transform frequency graph.
+                                            </p>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 12.29.33 PM.png" alt="..."
+                                            width="500"/>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 12.41.10 PM.png" alt="..."/>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 12.37.32 PM.png" alt="..."/>
+                                            <p>
+                                                I got these measurements by rotating the board on its edge on the table, which is why the measurements don't go exactly to 90.
+                                                Below is another graph of pitch readings, but this time without moving the board so that noise is more clear. It also seems that 
+                                                the high spike of high frequency data in the previous two graphs was caused by the way I was moving the board as it is not present here.
+                                                While the board is pretty accurate it is a bit noisy.
+                                            </p>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 12.51.38 PM.png" alt="..."/>
+                                            <p>I implemented a low pass filter with a cutoff frequency of 10 Hz and, as seen below, there was not much of a difference
+                                                because there was not a dominant frequency of noise.</p>
+                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 1.01.45 PM.png" alt="..."/>
+                                        </div>
+                                        <h2>Gyroscope</h2>
                                     </div>
                                 </div>
 
