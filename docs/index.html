@@ -116,7 +116,7 @@
                             <img class="img-fluid" src="assets/img/portfolio/Lab1.jpg" alt="..." />
                         </a>
                         <div class="portfolio-caption">
-                            <div class="portfolio-caption-heading">Lab 1 + 2: Setup and Bluetooth</div>
+                            <div class="portfolio-caption-heading">Lab 0 + 1: Setup and Bluetooth</div>
                             <div class="portfolio-caption-subheading text-muted">Setting up the Artemis Board and
                                 connecting it to my laptop via bluetooth</div>
                         </div>
@@ -124,6 +124,21 @@
                 </div>
                 <div class="col-lg-4 col-sm-6 mb-4">
                     <!-- Portfolio item 2-->
+                    <div class="portfolio-item">
+                        <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal2">
+                            <div class="portfolio-hover">
+                                <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
+                            </div>
+                            <img class="img-fluid" src="assets/img/portfolio/lab2/Lab2.jpg" alt="..." />
+                        </a>
+                        <div class="portfolio-caption">
+                            <div class="portfolio-caption-heading">Lab 2: Accelerating and Gyrating</div>
+                            <div class="portfolio-caption-subheading text-muted">Collecting angular data and handling noise.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-6 mb-4">
+                    <!-- Portfolio item TBD-->
                     <div class="portfolio-item">
                         <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModalTBD">
                             <div class="portfolio-hover">
@@ -393,24 +408,45 @@
                     <div class="row justify-content-center">
                         <div class="col-lg-8">
                             <div class="modal-body">
-                                <!-- Project details-->
-                                <h2 class="text-uppercase">Project Name</h2>
-                                <p class="item-intro text-muted">Lorem ipsum dolor sit amet consectetur.</p>
-                                <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/2.jpg" alt="..." />
-                                <p>Use this area to describe your project. Lorem ipsum dolor sit amet, consectetur
-                                    adipisicing elit. Est blanditiis dolorem culpa incidunt minus dignissimos deserunt
-                                    repellat aperiam quasi sunt officia expedita beatae cupiditate, maiores repudiandae,
-                                    nostrum, reiciendis facere nemo!</p>
-                                <ul class="list-inline">
-                                    <li>
-                                        <strong>Client:</strong>
-                                        Explore
-                                    </li>
-                                    <li>
-                                        <strong>Category:</strong>
-                                        Graphic Design
-                                    </li>
-                                </ul>
+                                <!-- Project Details -->
+                                <h1 class="text-decoration-underline">Lab 2: Accelerating and Gyrating</h1>
+                                <h2>Setup</h2>
+                                <div>
+                                    <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 2.39.47 AM.png" alt="..." 
+                                    width="500" height="500"/>
+                                    <p class="text-start">
+                                        Above shows the ICU connected to the Artemis via the QWIIC connect cable. The only setup I needed
+                                        to get the example code running was to change the value of AD0_VAL from 1 -> 0, which changes the 
+                                        starting I2C address. 
+                                    </p>
+                                    <p>
+                                        Below is a video of the accelerometer (above) and gyroscope (below) data. The pink, blue, and yellow lines represent
+                                        the x, y, and z axes respectively. They are all being measured and a notable difference between them is the accelerometer 
+                                        data returned to 0 when the board was not moving.
+                                    </p>
+                                    <iframe width="560" height="315" src="https://youtube.com/embed/QU1WC1swpME" frameborder="0"></iframe>
+                                    <iframe width="560" height="315" src="https://youtube.com/embed/P9jFdXRJSGQ" frameborder="0"></iframe>
+                                    <div class="text-start">
+                                        <h2>Accelerometer</h2>
+                                        <p>
+                                            To test the accuracy and noise of the accelerometer I made a new command to collect 200 pieces of data and 
+                                            measured the pitch (first) and roll (second) with a range of -90 -> 90º using the equations below. Included 
+                                            with a graph of the two is the fourier transform frequency graph.
+                                        </p>
+                                        <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 12.29.33 PM.png" alt="..."
+                                        width="500"/>
+                                        <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 12.41.10 PM.png" alt="..."/>
+                                        <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 12.37.32 PM.png" alt="..."/>
+                                        <p>
+                                            I got these measurements by rotating the board on its edge on the table, which is why the measurements don't go exactly to 90.
+                                            Below is another graph of pitch readings, but this time without moving the board so that noise is more clear. It also seems that 
+                                            the high spike of high frequency data in the previous two graphs was caused by the way I was moving the board as it is not present here.
+                                            
+                                        </p>
+                                        <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 12.51.38 PM.png" alt="..."/>
+                                    </div>
+                                </div>
+
                                 <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
                                     type="button">
                                     <i class="fas fa-xmark me-1"></i>

@@ -11,3 +11,4 @@ class CMD(Enum):
     SAMPLE_TIME = 7
     SEND_TIME_DATA = 8
     GET_TEMP_READINGS = 9
+    GET_ACCEL_READINGS = 10

@@ -33,8 +33,23 @@ static long previousMillis = 0;
 unsigned long currentMillis = 0;
 float times[100];
 float temps[100];
+float pitch[200];
+float roll[200];
+float lp_pitch[200];
+float lp_roll[200];
+float stamps[200];
 int stored_times = 0;
 //////////// Global Variables ////////////
+
+#include "ICM_20948.h"  // Click here to get the library: http://librarymanager/All#SparkFun_ICM_20948_IMU
+#include<math.h>
+
+#define SERIAL_PORT Serial
+#define AD0_VAL   0     // The value of the last bit of the I2C address, on the SparkFun 9DoF IMU breakout the default is 1
+
+
+ICM_20948_I2C myICM;  // Otherwise create an ICM_20948_I2C object
+///////////// Accelerometer //////////////
 
 enum CommandTypes
 {
@@ -48,6 +63,8 @@ enum CommandTypes
     SAMPLE_TIME,
     SEND_TIME_DATA,
     GET_TEMP_READINGS,
+    GET_ACCEL_READINGS,
+    LP_ACCEL_READINGS,
 };
 
 void
@@ -210,6 +227,74 @@ handle_command()
               tx_characteristic_string.writeValue(tx_estring_value.c_str());
             }
             break;
+        case GET_ACCEL_READINGS:
+            stored_times=0;
+
+            while(stored_times<200){
+              if(myICM.dataReady()){
+                myICM.getAGMT();
+                pitch[stored_times] = atan2(myICM.accX(),myICM.accZ())*180/M_PI;
+                roll[stored_times] = atan2(myICM.accY(),myICM.accZ())*180/M_PI;
+                stamps[stored_times] = (float)millis();
+                stored_times += 1;
+                delay(50);
+              }
+            }
+            for(int i=0; i<200; i++){
+                tx_estring_value.clear();
+                tx_estring_value.append("Acc");
+                tx_estring_value.append(pitch[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(roll[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(stamps[i]);
+                tx_characteristic_string.writeValue(tx_estring_value.c_str());
+            }
+
+            break;
+
+        case LP_ACCEL_READINGS:
+            stored_times=0;
+            float a;
+
+            while(stored_times<200){
+              if(myICM.dataReady()){
+                myICM.getAGMT();
+                stamps[stored_times] = (float)millis();
+                if(stored_times==0){
+                  pitch[stored_times] = atan2(myICM.accX(),myICM.accZ())*180/M_PI;
+                  roll[stored_times] = atan2(myICM.accY(),myICM.accZ())*180/M_PI;
+                  lp_pitch[stored_times] = atan2(myICM.accX(),myICM.accZ())*180/M_PI;
+                  lp_roll[stored_times] = atan2(myICM.accY(),myICM.accZ())*180/M_PI;
+                }
+                else{
+                  a = (stamps[stored_times]-stamps[stored_times-1]) / 1000;
+                  a = a/(a+(0.015915*2));
+                  pitch[stored_times] = atan2(myICM.accX(),myICM.accZ())*180/M_PI;
+                  roll[stored_times] = atan2(myICM.accY(),myICM.accZ())*180/M_PI;
+                  lp_pitch[stored_times] = (pitch[stored_times-1]*(1-a)) + (a * (atan2(myICM.accX(),myICM.accZ())*180/M_PI));
+                  lp_roll[stored_times] = (roll[stored_times-1]*(1-a)) + (a * (atan2(myICM.accY(),myICM.accZ())*180/M_PI));
+                }
+                stored_times += 1;
+                delay(50);
+              }
+            }
+            for(int i=0; i<200; i++){
+                tx_estring_value.clear();
+                tx_estring_value.append("LPAcc");
+                tx_estring_value.append(pitch[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(roll[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(lp_pitch[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(lp_roll[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(stamps[i]);
+                tx_characteristic_string.writeValue(tx_estring_value.c_str());
+            }
+
+            break;
 
         default:
             Serial.print("Invalid Command Type: ");
@@ -265,6 +350,22 @@ setup()
     Serial.println(BLE.address());
 
     BLE.advertise();
+
+    Wire.begin();
+    Wire.setClock(400000);
+    bool initialized = false;
+    while( !initialized )
+    {
+      myICM.begin( Wire, AD0_VAL );
+      Serial.print( F("Initialization of the sensor returned: ") );
+      Serial.println( myICM.statusString() );
+      if( myICM.status != ICM_20948_Stat_Ok ){
+        Serial.println( "Trying again..." );
+        delay(500);
+      }else{
+        initialized = true;
+      }
+    }
 }
 
 void
