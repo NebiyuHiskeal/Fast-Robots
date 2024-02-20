@@ -30,15 +30,6 @@ float tx_float_value = 0.0;
 
 long interval = 500;
 static long previousMillis = 0;
-unsigned long currentMillis = 0;
-float times[100];
-float temps[100];
-float pitch[200];
-float roll[200];
-float lp_pitch[200];
-float lp_roll[200];
-float stamps[200];
-int stored_times = 0;
 //////////// Global Variables ////////////
 
 #include "ICM_20948.h"  // Click here to get the library: http://librarymanager/All#SparkFun_ICM_20948_IMU
@@ -46,9 +37,27 @@ int stored_times = 0;
 
 #define SERIAL_PORT Serial
 #define AD0_VAL   0     // The value of the last bit of the I2C address, on the SparkFun 9DoF IMU breakout the default is 1
+#define ARRAY_LEN 1500
 
 
 ICM_20948_I2C myICM;  // Otherwise create an ICM_20948_I2C object
+
+unsigned long currentMillis = 0;
+float times[100];
+float temps[ARRAY_LEN];
+float pitch[ARRAY_LEN];
+float roll[ARRAY_LEN];
+float yaw[ARRAY_LEN];
+float lp_pitch[ARRAY_LEN];
+float lp_roll[ARRAY_LEN];
+float stamps[ARRAY_LEN];
+float gpitch[ARRAY_LEN];
+float groll[ARRAY_LEN];
+float gyaw[ARRAY_LEN];
+int stored_times = 0;
+float dt = 0;
+bool record = false;
+int stored = 0;
 ///////////// Accelerometer //////////////
 
 enum CommandTypes
@@ -65,6 +74,9 @@ enum CommandTypes
     GET_TEMP_READINGS,
     GET_ACCEL_READINGS,
     LP_ACCEL_READINGS,
+    GYRO_READINGS,
+    BOTH_READ,
+    COMPLEMENT_READ,
 };
 
 void
@@ -230,17 +242,17 @@ handle_command()
         case GET_ACCEL_READINGS:
             stored_times=0;
 
-            while(stored_times<200){
+            while(stored_times<ARRAY_LEN){
               if(myICM.dataReady()){
                 myICM.getAGMT();
                 pitch[stored_times] = atan2(myICM.accX(),myICM.accZ())*180/M_PI;
                 roll[stored_times] = atan2(myICM.accY(),myICM.accZ())*180/M_PI;
-                stamps[stored_times] = (float)millis();
+                stamps[stored_times] = (float)millis()/1000.;
                 stored_times += 1;
-                delay(50);
+                delay(10);
               }
             }
-            for(int i=0; i<200; i++){
+            for(int i=0; i<ARRAY_LEN; i++){
                 tx_estring_value.clear();
                 tx_estring_value.append("Acc");
                 tx_estring_value.append(pitch[i]);
@@ -257,10 +269,10 @@ handle_command()
             stored_times=0;
             float a;
 
-            while(stored_times<200){
+            while(stored_times<ARRAY_LEN){
               if(myICM.dataReady()){
                 myICM.getAGMT();
-                stamps[stored_times] = (float)millis();
+                stamps[stored_times] = (float)millis()/1000.;
                 if(stored_times==0){
                   pitch[stored_times] = atan2(myICM.accX(),myICM.accZ())*180/M_PI;
                   roll[stored_times] = atan2(myICM.accY(),myICM.accZ())*180/M_PI;
@@ -268,18 +280,18 @@ handle_command()
                   lp_roll[stored_times] = atan2(myICM.accY(),myICM.accZ())*180/M_PI;
                 }
                 else{
-                  a = (stamps[stored_times]-stamps[stored_times-1]) / 1000;
+                  a = (stamps[stored_times]-stamps[stored_times-1]);
                   a = a/(a+(0.015915*2));
+                  lp_pitch[stored_times] = (lp_pitch[stored_times-1]*(1-a)) + (a * (atan2(myICM.accX(),myICM.accZ())*180/M_PI));
+                  lp_roll[stored_times] = (lp_roll[stored_times-1]*(1-a)) + (a * (atan2(myICM.accY(),myICM.accZ())*180/M_PI));
                   pitch[stored_times] = atan2(myICM.accX(),myICM.accZ())*180/M_PI;
                   roll[stored_times] = atan2(myICM.accY(),myICM.accZ())*180/M_PI;
-                  lp_pitch[stored_times] = (pitch[stored_times-1]*(1-a)) + (a * (atan2(myICM.accX(),myICM.accZ())*180/M_PI));
-                  lp_roll[stored_times] = (roll[stored_times-1]*(1-a)) + (a * (atan2(myICM.accY(),myICM.accZ())*180/M_PI));
                 }
                 stored_times += 1;
-                delay(50);
+                delay(10);
               }
             }
-            for(int i=0; i<200; i++){
+            for(int i=0; i<ARRAY_LEN; i++){
                 tx_estring_value.clear();
                 tx_estring_value.append("LPAcc");
                 tx_estring_value.append(pitch[i]);
@@ -289,6 +301,150 @@ handle_command()
                 tx_estring_value.append(lp_pitch[i]);
                 tx_estring_value.append(" ");
                 tx_estring_value.append(lp_roll[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(stamps[i]);
+                tx_characteristic_string.writeValue(tx_estring_value.c_str());
+            }
+
+            break;
+
+        case BOTH_READ:
+            stored_times=0;
+
+            while(stored_times<ARRAY_LEN){
+              if(myICM.dataReady()){
+                stamps[stored_times] = (float)millis()/1000.;
+                myICM.getAGMT();
+                if (stored_times > 0){
+                  dt = stamps[stored_times] - stamps[stored_times-1];
+                  gpitch[stored_times] = gpitch[stored_times-1] + myICM.gyrX()*dt;
+                  groll[stored_times] = groll[stored_times-1] + myICM.gyrY()*dt;
+                  gyaw[stored_times] = gyaw[stored_times-1] + myICM.gyrZ()*dt;
+
+                  a = (stamps[stored_times]-stamps[stored_times-1]) / 1000;
+                  a = a/(a+(0.015915*2));
+                  lp_pitch[stored_times] = (lp_pitch[stored_times-1]*(1-a)) + (a * (atan2(myICM.accX(),myICM.accZ())*180/M_PI));
+                  lp_roll[stored_times] = (lp_roll[stored_times-1]*(1-a)) + (a * (atan2(myICM.accY(),myICM.accZ())*180/M_PI));
+                }
+                else{
+                  dt = stamps[stored_times];
+                  gpitch[stored_times] = myICM.gyrX()*dt;
+                  groll[stored_times] = myICM.gyrY()*dt;
+                  gyaw[stored_times] = myICM.gyrZ()*dt;
+                }
+                stored_times += 1;
+                delay(10);
+              }
+            }
+            for(int i=0; i<ARRAY_LEN; i++){
+                tx_estring_value.clear();
+                tx_estring_value.append("both");
+                tx_estring_value.append(gpitch[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(groll[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(gyaw[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(lp_pitch[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(lp_roll[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(stamps[i]);
+                tx_characteristic_string.writeValue(tx_estring_value.c_str());
+            }
+
+            break;
+
+
+        case GYRO_READINGS:
+            stored_times=0;
+
+            while(stored_times<ARRAY_LEN){
+              if(myICM.dataReady()){
+                stamps[stored_times] = (float)millis()/1000.;
+                myICM.getAGMT();
+                if (stored_times > 0){
+                  dt = stamps[stored_times] - stamps[stored_times-1];
+                  gpitch[stored_times] = gpitch[stored_times-1] + myICM.gyrX()*dt;
+                  groll[stored_times] = groll[stored_times-1] + myICM.gyrY()*dt;
+                  gyaw[stored_times] = gyaw[stored_times-1] + myICM.gyrZ()*dt;
+                }
+                else{
+                  dt = stamps[stored_times];
+                  gpitch[stored_times] = myICM.gyrX()*dt;
+                  groll[stored_times] = myICM.gyrY()*dt;
+                  gyaw[stored_times] = myICM.gyrZ()*dt;
+                }
+                stored_times += 1;
+                delay(10);
+              }
+            }
+            for(int i=0; i<ARRAY_LEN; i++){
+                tx_estring_value.clear();
+                tx_estring_value.append("Gyr");
+                tx_estring_value.append(gpitch[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(groll[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(gyaw[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(stamps[i]);
+                tx_characteristic_string.writeValue(tx_estring_value.c_str());
+            }
+
+            break;
+
+        case COMPLEMENT_READ:
+            stored_times=0;
+            float alpha;
+            alpha = 0.3;
+            while(stored_times<ARRAY_LEN){
+              if(myICM.dataReady()){
+                stamps[stored_times] = (float)millis()/1000.;
+                myICM.getAGMT();
+                if (stored_times > 0){
+                  dt = stamps[stored_times] - stamps[stored_times-1];
+                  lp_pitch[stored_times] =  myICM.gyrX()*dt;
+                  lp_roll[stored_times] = myICM.gyrY()*dt;
+                  gyaw[stored_times] = myICM.gyrZ()*dt;
+                  gpitch[stored_times] = pitch[stored_times-1] + lp_pitch[stored_times];
+                  groll[stored_times] = roll[stored_times-1] + lp_roll[stored_times];
+                  yaw[stored_times] = yaw[stored_times-1] + gyaw[stored_times];
+                  lp_pitch[stored_times] += lp_pitch[stored_times-1];
+                  lp_roll[stored_times] += lp_roll[stored_times-1];
+                  gyaw[stored_times] += gyaw[stored_times-1];
+                }
+                else{
+                  dt = .01;
+                  lp_pitch[0] =  myICM.gyrX()*dt;
+                  lp_roll[0] = myICM.gyrY()*dt;
+                  gyaw[0] = myICM.gyrZ()*dt;
+                  gpitch[0] = lp_pitch[0];
+                  groll[0] = lp_roll[0];
+                  yaw[0] = gyaw[0];
+                }
+                pitch[stored_times] =(atan2(myICM.accX(),myICM.accZ())*180/M_PI);
+                roll[stored_times] = (atan2(myICM.accY(),myICM.accZ())*180/M_PI);
+                pitch[stored_times] = ((1-alpha)*gpitch[stored_times]) + (alpha*pitch[stored_times]);
+                roll[stored_times] = ((1-alpha)*groll[stored_times]) + (alpha*roll[stored_times]);
+                stored_times += 1;
+                delay(10);
+              }
+            }
+            for(int i=0; i<ARRAY_LEN; i++){
+                tx_estring_value.clear();
+                tx_estring_value.append("Comp");
+                tx_estring_value.append(pitch[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(roll[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(yaw[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(lp_pitch[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(lp_roll[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(gyaw[i]);
                 tx_estring_value.append(" ");
                 tx_estring_value.append(stamps[i]);
                 tx_characteristic_string.writeValue(tx_estring_value.c_str());
@@ -307,6 +463,7 @@ void
 setup()
 {
     Serial.begin(115200);
+    record = true;
 
     BLE.begin();
 
@@ -384,6 +541,7 @@ write_data()
 
         previousMillis = currentMillis;
     }
+
 }
 
 void
@@ -405,11 +563,44 @@ loop()
     if (central) {
         Serial.print("Connected to: ");
         Serial.println(central.address());
+        record = true;
 
         // While central is connected
         while (central.connected()) {
             // Send data
             write_data();
+
+            if(myICM.dataReady() && (stored < ARRAY_LEN) && record){
+              myICM.getAGMT();
+              gpitch[stored] = myICM.gyrX();
+              groll[stored] = myICM.gyrY();
+              gyaw[stored] = myICM.gyrZ();
+              pitch[stored] = (atan2(myICM.accX(),myICM.accZ())*180/M_PI);
+              roll[stored] = (atan2(myICM.accY(),myICM.accZ())*180/M_PI);
+              stamps[stored] = millis();
+              stored += 1;
+            }
+            if(stored == ARRAY_LEN){
+              for(int i = 0; i < ARRAY_LEN; i++){
+                tx_estring_value.clear();
+                tx_estring_value.append("Auto");
+                tx_estring_value.append(pitch[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(roll[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(gpitch[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(groll[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(gyaw[i]);
+                tx_estring_value.append(" ");
+                tx_estring_value.append(stamps[i]);
+                tx_characteristic_string.writeValue(tx_estring_value.c_str());
+              }
+              Serial.println("Completed send");
+              stored = 0;
+              record = false;
+            }
 
             // Read data
             read_data();

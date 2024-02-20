@@ -426,31 +426,83 @@
                                     </p>
                                     <iframe width="560" height="315" src="https://youtube.com/embed/QU1WC1swpME" frameborder="0"></iframe>
                                     <iframe width="560" height="315" src="https://youtube.com/embed/P9jFdXRJSGQ" frameborder="0"></iframe>
-                                    <div class="text-start">
-                                        <h2>Accelerometer</h2>
-                                        <div>
-                                            <p>
-                                                To test the accuracy and noise of the accelerometer I made a new command to collect 200 pieces of data and 
-                                                measured the pitch (first) and roll (second) with a range of -90 -> 90º using the equations below. Included 
-                                                with a graph of the two is the fourier transform frequency graph.
-                                            </p>
-                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 12.29.33 PM.png" alt="..."
-                                            width="500"/>
-                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 12.41.10 PM.png" alt="..."/>
-                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 12.37.32 PM.png" alt="..."/>
-                                            <p>
-                                                I got these measurements by rotating the board on its edge on the table, which is why the measurements don't go exactly to 90.
-                                                Below is another graph of pitch readings, but this time without moving the board so that noise is more clear. It also seems that 
-                                                the high spike of high frequency data in the previous two graphs was caused by the way I was moving the board as it is not present here.
-                                                While the board is pretty accurate it is a bit noisy.
-                                            </p>
-                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 12.51.38 PM.png" alt="..."/>
-                                            <p>I implemented a low pass filter with a cutoff frequency of 10 Hz and, as seen below, there was not much of a difference
-                                                because there was not a dominant frequency of noise.</p>
-                                            <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 1.01.45 PM.png" alt="..."/>
-                                        </div>
-                                        <h2>Gyroscope</h2>
+                                </div>
+                                <div class="text-start">
+                                    <h2>Accelerometer</h2>
+                                    <div>
+                                        <p>
+                                            To test the accuracy and noise of the accelerometer I made a new command to collect 1000 pieces of data and 
+                                            measured the pitch (first) and roll (second) with a range of -90 -> 90º using the equations below. Included 
+                                            with a graph of the two is the fourier transform frequency graph.
+                                        </p>
+                                        <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-13 at 12.29.33 PM.png" alt="..."
+                                        width="500"/>
+                                        <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-20 at 2.47.26 AM.png" alt="..."/>
+                                        <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-20 at 2.47.33 AM.png" alt="..."/>
+                                        <p>
+                                            I got these measurements by rotating the board on its edge on the table. The data seems to be pretty accurate although quite noisy,
+                                            so below is the same data passed through a low pass filter with a cutoff frequency of 10 Hz. It does a good job of mitigating the
+                                            noise as well as muting any shakes from my hand. 
+                                        </p>
+                                        <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-20 at 2.54.59 AM.png" alt="..."/>
+                                        <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-20 at 2.47.47 AM.png" alt="..."/>
+                                        <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-20 at 2.47.55 AM.png" alt="..."/>
                                     </div>
+                                    <h2>Gyroscope</h2>
+                                    <p>
+                                        Below are the graphs for the pitch(left), roll(center), and yaw(right) as recorded by the gyroscope. The board was not moved
+                                        during these measurements so the drag is very clear, but there is little range in the measurements so they are precise, although
+                                        not accurate. Below those is data from me rotating about each axis sequentially from -90 -> 90º and it takes seemingly precise
+                                        and steady readings.
+                                    </p>
+                                    <div class="row">
+                                        <div class="col-lg-4 col-sm-6 mb-4">
+                                            <img class="img-fluid" src="assets/img/portfolio/lab2/Screenshot 2024-02-17 at 6.00.35 PM.png" alt="..."/>
+                                        </div>
+                                        <div class="col-lg-4 col-sm-6 mb-4">
+                                                <img class="img-fluid" src="assets/img/portfolio/lab2/Screenshot 2024-02-17 at 6.00.41 PM.png" alt="..."/>
+                                        </div>
+                                        <div class="col-lg-4 col-sm-6 mb-4">
+                                            <img class="img-fluid" src="assets/img/portfolio/lab2/Screenshot 2024-02-17 at 6.00.47 PM.png" alt="..."/>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-4 col-sm-6 mb-4">
+                                            <img class="img-fluid" src="assets/img/portfolio/lab2/Screenshot 2024-02-20 at 2.25.11 AM.png" alt="..."/>
+                                        </div>
+                                        <div class="col-lg-4 col-sm-6 mb-4">
+                                                <img class="img-fluid" src="assets/img/portfolio/lab2/Screenshot 2024-02-20 at 2.25.17 AM.png" alt="..."/>
+                                        </div>
+                                        <div class="col-lg-4 col-sm-6 mb-4">
+                                            <img class="img-fluid" src="assets/img/portfolio/lab2/Screenshot 2024-02-20 at 2.25.21 AM.png" alt="..."/>
+                                        </div>
+                                    </div>
+                                    <p>
+                                        I implemented a complementary filter with an alpha value of .3. I chose that number to mitigate the noise from the accelerometer.
+                                        Below is a screenshot of the pitch recordings from the gyroscope and from the complement filter. They follow the same trends but the 
+                                        complement is more responsive to quick changes and does not suffer from the drag of the gyroscope.
+                                    </p>
+                                    <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-20 at 3.55.58 AM.png" alt="..."/>
+                                    <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-20 at 4.10.37 AM.png" alt="..."/>
+                                    <h2>Sampling</h2>
+                                    <p>
+                                        After moving sampling to the main loop and removing print statements, I was able to record new IMU data every 2-10ms. I believe it fluctuated
+                                        that much because 2ms (.5 kHz), is about the max rate of the IMU's accelerometer and gyroscope data collection. This sampling is too quick though
+                                        and would only serve to fill the artemis' storage too quickly. The average sampling rate came out to about 3ms.
+                                    </p>
+                                    <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-20 at 4.44.43 AM.png" alt="..."/>
+                                    <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-20 at 4.46.25 AM.png" alt="..."/>
+                                    <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-20 at 4.46.13 AM.png" alt="..."/>
+                                    <p> So while sending at this rate the artemis can store and send up to 1500 datapoints in about 5 seconds.</p>
+                                    <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab2/Screenshot 2024-02-20 at 5.15.42 AM.png" alt="..."/>
+                                    <h2>Stunting</h2>
+                                    <p>
+                                        After playing with the robot for a bit I found that it is a shockingly quick car. It can turn on a dime at any point, if done 
+                                        while moving quickly it makes the car roll over. Similarly it drives at the same speed forward or backwards, and swapping 
+                                        between them quickly makes it flip over. One thing I'll need to be careful about is how instantaneous it changes direction. 
+                                        It happens fast enough that there is a loss of grip on the wheels, and as mentioned it is prone to flipping and rolling.
+                                    </p>
+                                    <iframe width="560" height="315" src="https://youtube.com/embed/xXX-Ti2rgNE" frameborder="0"></iframe>
                                 </div>
 
                                 <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
