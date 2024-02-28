@@ -3,6 +3,7 @@
 #include "EString.h"
 #include "RobotCommand.h"
 #include <ArduinoBLE.h>
+#include "SparkFun_VL53L1X.h"
 
 //////////// BLE UUIDs ////////////
 #define BLE_UUID_TEST_SERVICE "ce469c59-68b8-434c-8476-075d53ab2a68"
@@ -32,6 +33,14 @@ long interval = 500;
 static long previousMillis = 0;
 //////////// Global Variables ////////////
 
+#define SHUTDOWN_PIN A2
+#define INTERRUPT_PIN 3
+
+//Uncomment the following line to use the optional shutdown and interrupt pins.
+SFEVL53L1X distanceSensor;
+SFEVL53L1X distanceSensor2(Wire, SHUTDOWN_PIN, INTERRUPT_PIN);
+// SFEVL53L1X distanceSensor2;
+
 #include "ICM_20948.h"  // Click here to get the library: http://librarymanager/All#SparkFun_ICM_20948_IMU
 #include<math.h>
 
@@ -43,8 +52,6 @@ static long previousMillis = 0;
 ICM_20948_I2C myICM;  // Otherwise create an ICM_20948_I2C object
 
 unsigned long currentMillis = 0;
-float times[100];
-float temps[ARRAY_LEN];
 float pitch[ARRAY_LEN];
 float roll[ARRAY_LEN];
 float yaw[ARRAY_LEN];
@@ -54,29 +61,25 @@ float stamps[ARRAY_LEN];
 float gpitch[ARRAY_LEN];
 float groll[ARRAY_LEN];
 float gyaw[ARRAY_LEN];
+int distances_a[51];
+int distances_b[51];
 int stored_times = 0;
 float dt = 0;
+float start = 0;
 bool record = false;
 int stored = 0;
+int distance = 0;
 ///////////// Accelerometer //////////////
 
 enum CommandTypes
 {
-    PING,
-    SEND_TWO_INTS,
-    SEND_THREE_FLOATS,
-    ECHO,
-    DANCE,
-    SET_VEL,
-    GET_TIME_MILLIS,
-    SAMPLE_TIME,
-    SEND_TIME_DATA,
-    GET_TEMP_READINGS,
-    GET_ACCEL_READINGS,
     LP_ACCEL_READINGS,
     GYRO_READINGS,
     BOTH_READ,
     COMPLEMENT_READ,
+    READ_DISTANCE,
+    READ_DISTANCE_2,
+    ASAP,
 };
 
 void
@@ -106,165 +109,6 @@ handle_command()
         /*
          * Write "PONG" on the GATT characteristic BLE_UUID_TX_STRING
          */
-        case PING:
-            tx_estring_value.clear();
-            tx_estring_value.append("PONG");
-            tx_characteristic_string.writeValue(tx_estring_value.c_str());
-
-            Serial.print("Sent back: ");
-            Serial.println(tx_estring_value.c_str());
-
-            break;
-        /*
-         * Extract two integers from the command string
-         */
-        case SEND_TWO_INTS:
-            int int_a, int_b;
-
-            // Extract the next value from the command string as an integer
-            success = robot_cmd.get_next_value(int_a);
-            if (!success)
-                return;
-
-            // Extract the next value from the command string as an integer
-            success = robot_cmd.get_next_value(int_b);
-            if (!success)
-                return;
-
-            Serial.print("Two Integers: ");
-            Serial.print(int_a);
-            Serial.print(", ");
-            Serial.println(int_b);
-            
-            break;
-        /*
-         * Extract three floats from the command string
-         */
-        case SEND_THREE_FLOATS:
-            /*
-             * Your code goes here.
-             */
-
-            break;
-        /*
-         * Add a prefix and postfix to the string value extracted from the command string
-         */
-        case ECHO:
-
-            char char_arr[MAX_MSG_SIZE];
-
-            // Extract the next value from the command string as a character array
-            success = robot_cmd.get_next_value(char_arr);
-            if (!success)
-                return;
-
-            /*
-             * Your code goes here.
-             */
-            tx_estring_value.clear();
-            tx_estring_value.append("Robot says -> ");
-            tx_estring_value.append(char_arr);
-            tx_estring_value.append(" :)");
-            tx_characteristic_string.writeValue(tx_estring_value.c_str());
-            Serial.println(tx_estring_value.c_str());
-            
-            break;
-        /*
-         * DANCE
-         */
-        case DANCE:
-            Serial.println("Look Ma, I'm Dancin'!");
-
-            break;
-        
-        /*
-         * SET_VEL
-         */
-        case SET_VEL:
-
-            break;
-        
-        /* 
-         * The default case may not capture all types of invalid commands.
-         * It is safer to validate the command string on the central device (in python)
-         * before writing to the characteristic.
-         */
-
-        case GET_TIME_MILLIS:
-            tx_estring_value.clear();
-            tx_estring_value.append("T:");
-            tx_estring_value.append((float)millis());
-            tx_characteristic_string.writeValue(tx_estring_value.c_str());
-            Serial.println(tx_estring_value.c_str());
-            break;
-
-        case SAMPLE_TIME:
-            float start;
-            start = (float)millis();
-            while((millis() - start) < 5000) {
-              tx_estring_value.clear();
-              tx_estring_value.append("T:");
-              tx_estring_value.append((float)millis());
-              tx_characteristic_string.writeValue(tx_estring_value.c_str());
-            }
-            break;
-
-        case SEND_TIME_DATA:
-            stored_times = 0;
-            while (stored_times < 100) {
-              times[stored_times] = (float)millis();
-              stored_times += 1;
-            }
-            for(int i = 0; i < 100; i++){
-              tx_estring_value.clear();
-              tx_estring_value.append("T:");
-              tx_estring_value.append(times[i]);
-              tx_characteristic_string.writeValue(tx_estring_value.c_str());
-            }
-            break;
-
-        case GET_TEMP_READINGS:
-            stored_times = 0;
-            while (stored_times < 100) {
-              times[stored_times] = (float)millis();
-              temps[stored_times] = (float)getTempDegC();
-              stored_times += 1;
-            }
-            for(int i = 0; i < 100; i++){
-              tx_estring_value.clear();
-              tx_estring_value.append("Temp: ");
-              tx_estring_value.append(temps[i]);
-              tx_estring_value.append("@Time: ");
-              tx_estring_value.append(times[i]);
-              tx_characteristic_string.writeValue(tx_estring_value.c_str());
-            }
-            break;
-        case GET_ACCEL_READINGS:
-            stored_times=0;
-
-            while(stored_times<ARRAY_LEN){
-              if(myICM.dataReady()){
-                myICM.getAGMT();
-                pitch[stored_times] = atan2(myICM.accX(),myICM.accZ())*180/M_PI;
-                roll[stored_times] = atan2(myICM.accY(),myICM.accZ())*180/M_PI;
-                stamps[stored_times] = (float)millis()/1000.;
-                stored_times += 1;
-                delay(10);
-              }
-            }
-            for(int i=0; i<ARRAY_LEN; i++){
-                tx_estring_value.clear();
-                tx_estring_value.append("Acc");
-                tx_estring_value.append(pitch[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(roll[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(stamps[i]);
-                tx_characteristic_string.writeValue(tx_estring_value.c_str());
-            }
-
-            break;
-
         case LP_ACCEL_READINGS:
             stored_times=0;
             float a;
@@ -452,6 +296,79 @@ handle_command()
 
             break;
 
+        case READ_DISTANCE:
+            distance = 0;
+            for (int i = 0; i < 10; i++){
+              distanceSensor2.startRanging(); //Write configuration bytes to initiate measurement
+              while (!distanceSensor2.checkForDataReady())
+              {
+                delay(1);
+              }
+              distance = distanceSensor2.getDistance(); //Get the result of the measurement from the sensor
+              distanceSensor2.clearInterrupt();
+              distanceSensor2.stopRanging();
+
+              tx_estring_value.clear();
+              tx_estring_value.append("TOF");
+              tx_estring_value.append(distance);
+              tx_characteristic_string.writeValue(tx_estring_value.c_str());
+            }
+
+            break;
+
+        case READ_DISTANCE_2:
+            Serial.println("starting distance2");
+            distance = 0;
+            start = millis();
+            stored = 0;
+            distanceSensor2.startRanging(); //Write configuration bytes to initiate measurement
+            distanceSensor.startRanging();
+            while (stored < 51){
+              if(distanceSensor2.checkForDataReady() && distanceSensor.checkForDataReady()) {
+                distances_a[stored] = distanceSensor.getDistance(); //Get the result of the measurement from the sensor
+                distances_b[stored] = distanceSensor2.getDistance();
+                stamps[stored] = millis();
+
+                distanceSensor2.clearInterrupt();
+                distanceSensor.clearInterrupt();
+                // Serial.println(stored);
+                stored += 1;
+              }
+            }
+            distanceSensor2.stopRanging(); //Write configuration bytes to initiate measurement
+            distanceSensor.stopRanging();
+            for (int i = 0; i < stored; i++){
+              tx_estring_value.clear();
+              tx_estring_value.append("TOF2");
+              tx_estring_value.append(distances_a[i]);
+              tx_estring_value.append(" ");
+              tx_estring_value.append(distances_b[i]);
+              tx_estring_value.append(" ");
+              tx_estring_value.append(stamps[i]);
+              tx_characteristic_string.writeValue(tx_estring_value.c_str());
+            }
+            Serial.println("finished distance2");
+            break;
+
+        case ASAP:
+            distanceSensor.startRanging();
+            distanceSensor2.startRanging();
+            start = millis();
+            while(millis() - start < 5000){
+              if(distanceSensor2.checkForDataReady() && distanceSensor.checkForDataReady()){
+                Serial.println(millis());
+                // Serial.print("Distance1: ");
+                // Serial.print(distanceSensor.getDistance());
+                // Serial.println(" mm");
+                // Serial.print("Distance2: ");
+                // Serial.print(distanceSensor2.getDistance());
+                // Serial.println(" mm");
+                distanceSensor2.clearInterrupt();
+                distanceSensor.clearInterrupt();
+              }
+            }
+            break;
+
         default:
             Serial.print("Invalid Command Type: ");
             Serial.println(cmd_type);
@@ -510,19 +427,39 @@ setup()
 
     Wire.begin();
     Wire.setClock(400000);
-    bool initialized = false;
-    while( !initialized )
+    // bool initialized = false;
+    // while( !initialized )
+    // {
+    //   myICM.begin( Wire, AD0_VAL );
+    //   Serial.print( F("Initialization of the sensor returned: ") );
+    //   Serial.println( myICM.statusString() );
+    //   if( myICM.status != ICM_20948_Stat_Ok ){
+    //     Serial.println( "Trying again..." );
+    //     delay(500);
+    //   }else{
+    //     initialized = true;
+    //   }
+    // }
+    pinMode(SHUTDOWN_PIN, OUTPUT);
+    digitalWrite(SHUTDOWN_PIN, LOW);
+    distanceSensor.setI2CAddress(80);
+    if (distanceSensor.begin() != 0) //Begin returns 0 on a good init
     {
-      myICM.begin( Wire, AD0_VAL );
-      Serial.print( F("Initialization of the sensor returned: ") );
-      Serial.println( myICM.statusString() );
-      if( myICM.status != ICM_20948_Stat_Ok ){
-        Serial.println( "Trying again..." );
-        delay(500);
-      }else{
-        initialized = true;
-      }
+      Serial.println("Sensor 1 failed to begin. Please check wiring. Freezing...");
+      while (1)
+        ;
     }
+    Serial.println("Sensor 1 online!");
+    digitalWrite(SHUTDOWN_PIN, HIGH);
+    if (distanceSensor2.begin() != 0) //Begin returns 0 on a good init
+    {
+      Serial.println("Sensor 2 failed to begin. Please check wiring. Freezing...");
+      while (1)
+        ;
+    }
+    distanceSensor2.setDistanceModeShort();
+    distanceSensor.setDistanceModeShort();
+  Serial.println("Sensor 2 online!");
 }
 
 void
@@ -569,38 +506,6 @@ loop()
         while (central.connected()) {
             // Send data
             write_data();
-
-            if(myICM.dataReady() && (stored < ARRAY_LEN) && record){
-              myICM.getAGMT();
-              gpitch[stored] = myICM.gyrX();
-              groll[stored] = myICM.gyrY();
-              gyaw[stored] = myICM.gyrZ();
-              pitch[stored] = (atan2(myICM.accX(),myICM.accZ())*180/M_PI);
-              roll[stored] = (atan2(myICM.accY(),myICM.accZ())*180/M_PI);
-              stamps[stored] = millis();
-              stored += 1;
-            }
-            if(stored == ARRAY_LEN){
-              for(int i = 0; i < ARRAY_LEN; i++){
-                tx_estring_value.clear();
-                tx_estring_value.append("Auto");
-                tx_estring_value.append(pitch[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(roll[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(gpitch[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(groll[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(gyaw[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(stamps[i]);
-                tx_characteristic_string.writeValue(tx_estring_value.c_str());
-              }
-              Serial.println("Completed send");
-              stored = 0;
-              record = false;
-            }
 
             // Read data
             read_data();

@@ -138,6 +138,21 @@
                     </div>
                 </div>
                 <div class="col-lg-4 col-sm-6 mb-4">
+                    <!-- Portfolio item 3-->
+                    <div class="portfolio-item">
+                        <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal3">
+                            <div class="portfolio-hover">
+                                <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
+                            </div>
+                            <img class="img-fluid" src="assets/img/portfolio/lab3/lab3.png" alt="..." />
+                        </a>
+                        <div class="portfolio-caption">
+                            <div class="portfolio-caption-heading">Lab 3: TOF Sensors</div>
+                            <div class="portfolio-caption-subheading text-muted">Reading from TOF sensors.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-6 mb-4">
                     <!-- Portfolio item TBD-->
                     <div class="portfolio-item">
                         <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModalTBD">
@@ -313,9 +328,9 @@
                                         <div>
                                             <h4 class="text-start">Notification Handler</h4>
                                             <p>
-                                                Here I was to create a notification handler which would be called whenever a message was recieved from the board. This is the final form of 
+                                                Here I was to create a notification handler which would be called whenever a message was received from the board. This is the final form of 
                                                 my handler that handles all the commands from this lab. It will store temperature and time readings in ther own lists as well as storing
-                                                a log of each message recieved in a list, and it prints each message as it recieves it.
+                                                a log of each message received in a list, and it prints each message as it receives it.
                                             </p>
                                             <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab1/Screenshot 2024-02-06 at 4.01.55 AM.png"/>
                                         </div>
@@ -505,6 +520,108 @@
                                     <iframe width="560" height="315" src="https://youtube.com/embed/xXX-Ti2rgNE" frameborder="0"></iframe>
                                 </div>
 
+                                <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
+                                    type="button">
+                                    <i class="fas fa-xmark me-1"></i>
+                                    Close Project
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Portfolio item 3 modal popup-->
+    <div class="portfolio-modal modal fade" id="portfolioModal3" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="close-modal" data-bs-dismiss="modal"><img src="assets/img/close-icon.svg"
+                        alt="Close modal" /></div>
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="modal-body">
+                                <!-- Project Details -->
+                                <h1 class="text-decoration-underline">Lab 3: TOF Sensors</h1>
+                                <div>
+                                    <h2>Prelab</h2>
+                                    <p class="text-start">
+                                        We will be connecting two identical Time of Flight sensors, which means they have the same I2C address, 0x52. To use both 
+                                        simultaneously requires using the XSHUT pin to change the address of one of the sensors. I will be placing the sensors on 
+                                        the front and back end of the robot. Since from my understanding our robot will be acting in static settings, it will not 
+                                        need to worry about an obstacle coming from the side, which will be its blindspot. The 180º separation of the cameras will
+                                        make it easier to swap between driving the robot forwards and backwards. Below is a diagram of how I connected the sensors 
+                                        to the Artemis board.
+                                    </p>
+                                    <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab3/IMG_E0421300835A-1.jpeg" alt="..." 
+                                        width="500" height="500"/>
+                                </div>
+                                <h2>First Sensor</h2>
+                                <div class="text-start">
+                                    <div class="row">
+                                        <img class="col-lg-4 col-sm-6 mb-4" src="assets/img/portfolio/lab3/IMG_8603 Large Medium.jpeg" alt="..." width="500" height="500"/>
+                                        <img class="col-lg-4 col-sm-6 mb-4" src="assets/img/portfolio/lab3/Screenshot 2024-02-28 at 12.43.48 AM.png" alt="..." width="500" height="500"/>
+                                    </div>
+                                    <p>
+                                        Above is the final product of connecting the first sensor to the Artemis and scanning for it. The address printed is 82, which is 0x52 in decimal. 
+                                        This means I will need to choose an address other than 82 for the other sensor to use. In choosing the distance mode, I decided to test the short 
+                                        range. It is more accurate than the long range mode, and less prone to setting noise. However, I believe for stunts that require the robot to drive 
+                                        forward at a high speed, the short range will not see far enough ahead for the robot to react. In the mean time I have tested the short range mode 
+                                        by gathering 50 readings at .3, .6, .9, and 1.2 meters and averaging them. Below is a graph that compares the measured and actual distances.
+                                    </p>
+                                    <div class="row">
+                                        <img class="col-lg-4 col-sm-6 mb-4" src="assets/img/portfolio/lab3/Screenshot 2024-02-28 at 12.55.58 AM.png" alt="..."/>
+                                        <img class="col-lg-4 col-sm-6 mb-4" src="assets/img/portfolio/lab3/Screenshot 2024-02-28 at 1.03.05 AM.png" alt="..."/>
+                                    </div>
+                                    <p>
+                                        The graph shows the readings deviating more as the distance gets further. I believe some of this is likely due to error in my measurements of the 
+                                        actual distance. In the screenshot on the right it shows the variance of each measurement set in mm. It shows that the sensors are very precise, if
+                                        a little inaccurate at the edge of its range.
+                                    </p>
+                                </div>
+                                <h2>Two at Once!</h2>
+                                <div class="text-start">
+                                    <p>
+                                        To use both sensors at once, one sensor must receive a low signal to its XSHUT port. This will cause it to ignore what is on the I2C bus
+                                        even if it is addressed to it. Then the other sensor must have its address changed, and the XSHUT can be returned to high, and the sensor
+                                        will receive I2C communications normally. 
+                                    </p>
+                                    <div class="row">
+                                        <img class="col-lg-4" src="assets/img/portfolio/lab3/Screenshot 2024-02-28 at 1.32.31 AM.png" alt="..."/>
+                                        <img class="col-lg-6" src="assets/img/portfolio/lab3/Screenshot 2024-02-28 at 1.34.51 AM.png" alt="..."/>
+                                    </div>
+                                    <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab3/Screenshot 2024-02-28 at 1.43.27 AM.png" alt="..."/>
+                                </div>
+                                <h2>Speed Reading</h2>
+                                <div class="text-start">
+                                    <img class="col-lg-3" src="assets/img/portfolio/lab3/Screenshot 2024-02-28 at 2.06.14 AM.png" alt="..."/>
+                                    <img class="col-lg-6" src="assets/img/portfolio/lab3/Screenshot 2024-02-28 at 2.06.31 AM.png" alt="..."/>
+                                    <p>
+                                        Above is my first attempt at gathering readings as quickly as possible along with the code that was being executed. A new datapoint 
+                                        was being recorded about every 100ms. I thought this was being slowed by all the Serial.prints, so I changed it so that it would only print time 
+                                        when a new point was available, but this resulted in a more consistent 100ms, not a faster read time. 
+                                    </p>
+                                    <div class="row">
+                                        <img class="col-lg-6" src="assets/img/portfolio/lab3/Screenshot 2024-02-28 at 2.07.07 AM.png" alt="..."/>
+                                        <img class="col-lg-4" src="assets/img/portfolio/lab3/Screenshot 2024-02-28 at 2.09.15 AM.png" alt="..."/>
+                                    </div>
+                                    <p>
+                                        This sampling rate is much slower than the VL53L0X data sheet's 50Hz sampling rate. So the limiting factor is the Artemis, although I am uncertain why.
+                                        Finally I created a method to send sensor data over bluetooth and plotted it using matplotlib.
+                                    </p>
+                                    <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab3/Screenshot 2024-02-28 at 3.08.56 AM.png" alt="..."/>
+                                </div>
+                                <!-- <ul class="list-inline">
+                                    <li>
+                                        <strong>Client:</strong>
+                                        Threads
+                                    </li>
+                                    <li>
+                                        <strong>Category:</strong>
+                                        Illustration
+                                    </li>
+                                </ul> -->
                                 <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
                                     type="button">
                                     <i class="fas fa-xmark me-1"></i>

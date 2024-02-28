@@ -30,13 +30,12 @@ void setup(void)
   Wire.begin();
 
   Serial.begin(115200);
+  pinMode(SHUTDOWN_PIN, OUTPUT);
+  digitalWrite(SHUTDOWN_PIN, LOW);
   Serial.println("VL53L1X Qwiic Test");
+  Serial.print("Address 1 (start): ");
   Serial.println(distanceSensor.getI2CAddress());
-  distanceSensor2.sensorOff();
-  distanceSensor.setI2CAddress(distanceSensor.getI2CAddress()+1);
-  distanceSensor2.sensorOn();
-  Serial.println(distanceSensor2.getI2CAddress());
-  Serial.println(distanceSensor.getI2CAddress());
+  distanceSensor.setI2CAddress(80);
 
   if (distanceSensor.begin() != 0) //Begin returns 0 on a good init
   {
@@ -45,6 +44,11 @@ void setup(void)
       ;
   }
   Serial.println("Sensor 1 online!");
+  digitalWrite(SHUTDOWN_PIN, HIGH);
+  Serial.print("Address 1 (end): ");
+  Serial.println(distanceSensor.getI2CAddress());
+  Serial.print("Address 2: ");
+  Serial.println(distanceSensor2.getI2CAddress());
   if (distanceSensor2.begin() != 0) //Begin returns 0 on a good init
   {
     Serial.println("Sensor 2 failed to begin. Please check wiring. Freezing...");
@@ -65,16 +69,13 @@ void loop(void)
   distanceSensor.clearInterrupt();
   distanceSensor.stopRanging();
 
-  Serial.print("Distance1(mm): ");
-  Serial.print(distance);
-
   float distanceInches= distance * 0.0393701;
   float distanceFeet = distanceInches / 12.0;
-
-  Serial.print("\tDistance1(ft): ");
-  Serial.print(distanceFeet, 2);
-
-  Serial.println();
+  Serial.print("Distance1(ft): ");
+  Serial.print(distanceFeet);
+  Serial.print("ft ");
+  Serial.print(distanceInches);
+  Serial.print("in");
 
   distanceSensor2.startRanging(); //Write configuration bytes to initiate measurement
   while (!distanceSensor2.checkForDataReady())
@@ -85,14 +86,13 @@ void loop(void)
   distanceSensor2.clearInterrupt();
   distanceSensor2.stopRanging();
 
-  Serial.print("Distance2(mm): ");
-  Serial.print(distance2);
-
-  float distanceInches2 = distance2 * 0.0393701;
+  float distanceInches2= distance2 * 0.0393701;
   float distanceFeet2 = distanceInches2 / 12.0;
-
   Serial.print("\tDistance2(ft): ");
-  Serial.print(distanceFeet2, 2);
+  Serial.print(distanceFeet2);
+  Serial.print("ft ");
+  Serial.print(distanceInches2);
+  Serial.print("in");
 
   Serial.println();
 }
