@@ -153,6 +153,21 @@
                     </div>
                 </div>
                 <div class="col-lg-4 col-sm-6 mb-4">
+                    <!-- Portfolio item 4-->
+                    <div class="portfolio-item">
+                        <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal4">
+                            <div class="portfolio-hover">
+                                <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
+                            </div>
+                            <img class="img-fluid" src="assets/img/portfolio/lab4/lab4.png" alt="..." />
+                        </a>
+                        <div class="portfolio-caption">
+                            <div class="portfolio-caption-heading">Lab 4: Getting Going</div>
+                            <div class="portfolio-caption-subheading text-muted">Using 2 Motor Drivers</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-6 mb-4">
                     <!-- Portfolio item TBD-->
                     <div class="portfolio-item">
                         <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModalTBD">
@@ -622,6 +637,99 @@
                                         Illustration
                                     </li>
                                 </ul> -->
+                                <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
+                                    type="button">
+                                    <i class="fas fa-xmark me-1"></i>
+                                    Close Project
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Portfolio item 4 modal popup-->
+    <div class="portfolio-modal modal fade" id="portfolioModal4" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="close-modal" data-bs-dismiss="modal"><img src="assets/img/close-icon.svg"
+                        alt="Close modal" /></div>
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="modal-body">
+                                <!-- Project Details -->
+                                <h1 class="text-decoration-underline">Lab 4: Getting Going</h1>
+                                <div>
+                                    <h2>Prelab</h2>
+                                    <div class="text-start">
+                                        <p>
+                                            I chose to use pins A0 and A1 for the right motor, and A14 and A16 for the left motor. I mostly chose these pins 
+                                            because I wanted the pins to be on the same side of the Artemis as the wheels they were driving. This made it easier to
+                                            follow wires when I was having issues.
+                                        </p>
+                                        <img class="img-fluid d-block mx-auto" src="assets/img/portfolio/lab4/wiring.jpeg" alt="..."/>
+                                        <p>
+                                            Using a separate battery for the motor drivers and the Artemis prevents the Artemis from seeing jumps in current that the motor 
+                                            drivers can cause for example when they start up.
+                                        </p>
+                                    </div>
+                                    <h2>Lab Tasks</h2>
+                                    <div class="text-start">
+                                        <h3>Oscilloscope</h3>
+                                        <iframe width="560" height="315" src="https://youtube.com/embed/nu4_56RS3DM" frameborder="0"></iframe>
+                                        <img class="col-lg-5" src="assets/img/portfolio/lab4/OscSet.jpeg" alt="..."/>
+                                        <img class="col-lg-5" src="assets/img/portfolio/lab4/Screenshot 2024-03-12 at 3.56.43 AM.png" alt="..."/>
+                                        <p>
+                                            To test using the board, I set up the power supply with 3.7V and cycled the PMW value from 255 to 0 every 50ms. The oscilloscope 
+                                            showed the board behaving as expected by generating a square wave, meaning the output was a constant value.
+                                        </p>
+                                        <h3>Spinning Spinning Spinning</h3>
+                                        <iframe width="560" height="315" src="https://youtube.com/embed/JiuRD1EhSOE" frameborder="0"></iframe>
+                                        <p>
+                                            Unfortunately I forgot to record the wheels spinning independently before fully assembling the components, but above is a video of the
+                                            wheels spinning in both directions individually at the end. The code I used to do the original testing was very similar to what was used
+                                            with the oscilliscope, but for the video I used a bluetooth command that sets all 4 pin values.
+                                        </p>
+                                        <img class="col-lg-5" src="assets/img/portfolio/lab4/Screenshot 2024-03-12 at 4.00.14 AM.png" alt="..."/>
+                                        <p>
+                                            But once I had tested that the motor drivers were connected properly I assembled
+                                            everything onto the chasis. Not visible are the motor drivers which are under the tape that the Artemis sits on.
+                                        </p>
+                                        <img class="col-lg-5" src="assets/img/portfolio/lab4/IMG_8639.jpeg" alt="..."/>
+                                        <img class="col-lg-5" src="assets/img/portfolio/lab4/IMG_8640.jpeg" alt="..."/>
+                                        <h3>Behind The Wheel</h3>
+                                        <p>
+                                            To find the lowest PWM value that could drive the car, I set it on the ground and started with a value I was confident would work (100 for both forward pins)
+                                            and decremented by 10, alternating between decreasing left and right. I ended up determining that the lowest I could drive with is 40 forward for both sides. 
+                                            To find the minimum value to do an on axis turn, I started with left forward at 40 and right backward at 40, and did the same increment/decrement testing to
+                                            find the balance of forward value = 2*backward value for ~90º turn.
+                                        </p>
+                                        <iframe width="560" height="315" src="https://youtube.com/embed/lgpQN122B3g" frameborder="0"></iframe>
+                                        <iframe width="560" height="315" src="https://youtube.com/embed/WLtXE8T2iu4" frameborder="0"></iframe>
+                                        <img class="col-lg-5" src="assets/img/portfolio/lab4/Screenshot 2024-03-12 at 4.18.09 AM.png" alt="..."/>
+                                        <p>
+                                            Unfortunately as I attempted to make it drive in a straight line I found that the minimum being the same for both was a coincidence, because to drive straight 
+                                            the left motor needed a much higher value than the right. I began with 100 for both forward pins, to ensure it could cover the minimum 6 ft distance, and saw
+                                            that the path was heavily leaning left, aka the right motor was spinning faster than the left. I guess and checked my way to a balance and settled on the right
+                                            PMW being 0.6 * the left. The guess and check method provided some gems such as this
+                                        </p>
+                                        <iframe width="560" height="315" src="https://youtube.com/embed/Bz3M6emjo8w" frameborder="0"></iframe>
+                                        <p>
+                                            I found the values like this because I made a bluetooth command to update the PMW values, which made it very simple to continuously try new values. 
+                                            The bluetooth command code is shown above with the demonstration of both wheels spinning. But below is the final video of the car driving straight 
+                                            and the PMW values that I settled on for the test.
+                                        </p>
+                                        <iframe width="560" height="315" src="https://youtube.com/embed/YjdOqPhuq3I" frameborder="0"></iframe>
+                                        <img class="col-lg-5" src="assets/img/portfolio/lab4/Screenshot 2024-03-12 at 4.18.43 AM.png" alt="..."/>
+                                        <p>
+                                            For my open loop, I had the robot drive forward, do a spin, then reverses out of the spin.
+                                        </p>
+                                        <iframe width="560" height="315" src="https://youtube.com/embed/hBZMEaRwASA" frameborder="0"></iframe>
+                                        <img class="col-lg-5" src="assets/img/portfolio/lab4/Screenshot 2024-03-12 at 7.24.03 AM.png" alt="..."/>
+                                    </div>
+                                </div>
                                 <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
                                     type="button">
                                     <i class="fas fa-xmark me-1"></i>
