@@ -1,10 +1,13 @@
 from enum import Enum
 
 class CMD(Enum):
-    LP_ACCEL_READINGS = 0
-    GYRO_READINGS = 1
-    BOTH_READ = 2
-    COMPLEMENT_READ = 3
-    READ_DISTANCE = 4
-    READ_DISTANCE_2 = 5
-    ASAP = 6
+    LOG = 0
+    ICM = 1
+    DISTANCE1 = 2
+    DISTANCE2 = 3
+    PID = 4
+    STOP = 5
+    GAINS = 6
+    DRIVE = 7
+    RLIMIT = 8
+    LLIMIT = 9

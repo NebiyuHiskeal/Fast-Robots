@@ -168,6 +168,36 @@
                     </div>
                 </div>
                 <div class="col-lg-4 col-sm-6 mb-4">
+                    <!-- Portfolio item 5-->
+                    <div class="portfolio-item">
+                        <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal5">
+                            <div class="portfolio-hover">
+                                <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
+                            </div>
+                            <img class="img-fluid" src="assets/img/portfolio/lab5/blocked.png" alt="..." />
+                        </a>
+                        <div class="portfolio-caption">
+                            <div class="portfolio-caption-heading">Lab 5: STOP!</div>
+                            <div class="portfolio-caption-subheading text-muted">Setting stop distance with PID control</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-6 mb-4">
+                    <!-- Portfolio item 6-->
+                    <div class="portfolio-item">
+                        <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal6">
+                            <div class="portfolio-hover">
+                                <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
+                            </div>
+                            <img class="img-fluid" src="assets/img/portfolio/lab6/lab6.jpeg" alt="..." />
+                        </a>
+                        <div class="portfolio-caption">
+                            <div class="portfolio-caption-heading">Lab 6: Spinning Into Control</div>
+                            <div class="portfolio-caption-subheading text-muted">Orienting using PID control</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-6 mb-4">
                     <!-- Portfolio item TBD-->
                     <div class="portfolio-item">
                         <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModalTBD">
@@ -729,6 +759,118 @@
                                         <iframe width="560" height="315" src="https://youtube.com/embed/hBZMEaRwASA" frameborder="0"></iframe>
                                         <img class="col-lg-5" src="assets/img/portfolio/lab4/Screenshot 2024-03-12 at 7.24.03 AM.png" alt="..."/>
                                     </div>
+                                </div>
+                                <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
+                                    type="button">
+                                    <i class="fas fa-xmark me-1"></i>
+                                    Close Project
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Portfolio item 5 modal popup-->
+    <div class="portfolio-modal modal fade" id="portfolioModal5" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="close-modal" data-bs-dismiss="modal"><img src="assets/img/close-icon.svg"
+                        alt="Close modal" /></div>
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="modal-body">
+                                <!-- Project details-->
+                                <h2 class="text-uppercase">The illness got me</h2>
+                                <p class="item-intro text-muted"></p>
+                                <img class="col-lg-3" src="assets/img/portfolio/lab5/sick.png"
+                                    alt="..." />
+                                <p><strong>I'll get back to this one!</strong></p>
+                                <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
+                                    type="button">
+                                    <i class="fas fa-xmark me-1"></i>
+                                    Close Project
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Portfolio item 6 modal popup-->
+    <div class="portfolio-modal modal fade" id="portfolioModal6" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="close-modal" data-bs-dismiss="modal"><img src="assets/img/close-icon.svg"
+                        alt="Close modal" /></div>
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="modal-body">
+                                <!-- Project details-->
+                                <h1 class="text-decoration-underline">Lab 6: Spinning Into Control</h1>
+                                <div class="text-start">
+                                    <h2 class="text-center">Prelab</h2>
+                                    <p>
+                                        Initially started by having the PID function use the data stored in logging arrays, which allowed the 
+                                        orientation to run for about 7 seconds. I then modified the arduino code so that it could run the controller
+                                        and store and then send data for the 7 seconds without interrupting the control. I created a command to set a 
+                                        flag to run the PID controller and in the main loop, if the flag was set it would call the function. This command 
+                                        also decided the target angle for the bot to align itself with respect to its initial position. Similarly 
+                                        there is a command and flag for recording data, and when the logs are full it sets another flag to start sending
+                                        in each loop iteration instead of recording.
+                                    </p>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab6/Screenshot 2024-03-19 at 12.56.43 AM.png" alt="..."/>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab6/Screenshot 2024-03-19 at 12.58.51 AM.png" alt="..."/>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab6/Screenshot 2024-03-19 at 1.03.37 AM.png" alt="..."/>                                    
+                                    <p>
+                                        I also added a stop command so that I could stop the robot at any point during its operation and send any data 
+                                        it had recorded, and a command to change gain. Because of these, I could run the PID controller indefinitely while 
+                                        collecting data and adjusting gains as needed, and pause anytime the robot got out of control. 
+                                    </p>
+                                </div>
+                                <div class="text-start">
+                                    <h2 class="text-center">Lab Tasks</h2>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab6/Screenshot 2024-03-19 at 1.44.23 AM.png" alt="..."/>
+                                    <p>
+                                        The ICM does have some drift as you can see in the graph above. Those measurements were taken with 
+                                        the bot sitting still, so it does slightly drift positive. One way to accommodate this would be to use 
+                                        the complimentary filter we created in lab2, but I found that the drift in this case is minimal enough 
+                                        that it does not impact the goals of orienting the robot unless it is left to sit for several minutes. 
+                                        Another limitation of the gyroscope is the rate at which it reads data, the maximum rate it can read a 
+                                        change in degrees is 2000 per second, which I set it to ensure data is being gathered as quickly as possible.
+                                        I did this by adding the below code to the setup section of the arduino sketch.
+                                    </p>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab6/Screenshot 2024-03-19 at 1.52.51 AM.png" alt="..."/>
+                                    <p>
+                                        I started by implementing just a P controller. In my PID command I read in a goal angle, and make sure it
+                                        is between 0 and 360. Then in the Pid control function, I assign my goal to be that angle distance from the 
+                                        first measured angle. This helps mitigate the effect of drift from letting the bot sit before starting the 
+                                        controller. This worked pretty easily sort of by chance. I selected 2 as my beginning Kp value arbitrarily 
+                                        and it just so happened to be a good value.
+                                    </p>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab6/Screenshot 2024-03-19 at 1.55.41 AM.png" alt="..."/>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab6/Screenshot 2024-03-19 at 2.14.47 AM.png" alt="..."/>
+                                    <p>
+                                        The python code above sets the minimum PMW values to account for the difference in motor strength as 
+                                        well as helping scale up the rate at which the robot turns. It then sets the gains so that only the P
+                                        value is used, and sets the recording flag. As you can see in the video, this setup has the bot snap
+                                        into orientation with little oscillation. 
+                                    </p>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab6/Screenshot 2024-03-19 at 2.14.29 AM.png" alt="..."/>
+                                    <iframe width="560" height="315" src="https://youtube.com/embed/pwFftW0N86o" frameborder="0"></iframe>
+                                    <p>
+                                        I tried to add in I and D components, but both made the orientation worse in one way or another. The
+                                        integral portion did technically make the orientation more accurate, but this resulted in the motor 
+                                        stuttering a bit at the end of it's alignment to slightly tweak the angle, because the integral term 
+                                        adds back some of the slop that I built in to my PID controller by allowing it to be +/- 5º of the 
+                                        desired angle. The derivative term could have benefitted from some filtering as it made the output 
+                                        oscillate a lot at the end. The end behavior with the derivative term involved was the bot rapidly
+                                        switching the direction it was turning and "walking" forward instead of adjusting it's angle.
+                                    </p>
                                 </div>
                                 <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
                                     type="button">

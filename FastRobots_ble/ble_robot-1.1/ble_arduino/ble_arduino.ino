@@ -30,11 +30,16 @@ EString tx_estring_value;
 float tx_float_value = 0.0;
 
 long interval = 500;
-static long previousMillis = 0;
+float previousMillis = 0;
 //////////// Global Variables ////////////
 
 #define SHUTDOWN_PIN A2
 #define INTERRUPT_PIN 3
+#define RIGHT_F_PIN A1
+#define RIGHT_B_PIN A0
+#define LEFT_F_PIN A14
+#define LEFT_B_PIN A16
+
 
 //Uncomment the following line to use the optional shutdown and interrupt pins.
 SFEVL53L1X distanceSensor;
@@ -51,35 +56,60 @@ SFEVL53L1X distanceSensor2(Wire, SHUTDOWN_PIN, INTERRUPT_PIN);
 
 ICM_20948_I2C myICM;  // Otherwise create an ICM_20948_I2C object
 
-unsigned long currentMillis = 0;
-float pitch[ARRAY_LEN];
-float roll[ARRAY_LEN];
-float yaw[ARRAY_LEN];
-float lp_pitch[ARRAY_LEN];
-float lp_roll[ARRAY_LEN];
+float currentMillis = 0;
 float stamps[ARRAY_LEN];
 float gpitch[ARRAY_LEN];
 float groll[ARRAY_LEN];
 float gyaw[ARRAY_LEN];
-int distances_a[51];
-int distances_b[51];
+float distances_a[ARRAY_LEN];
+float distances_b[ARRAY_LEN];
+float kps[ARRAY_LEN];
+float kis[ARRAY_LEN];
+float kds[ARRAY_LEN];
 int stored_times = 0;
 float dt = 0;
-float start = 0;
-bool record = false;
+float initial = 0;
+float start;
+float yaw = 0;
+float alpha = 0.3;
+float kp = 2;
+float ki = .5;
+float kd = .5;
+float P = 0;
+float I = 0;
+float D = 0;
+int goal = 0;
+float curr_err = 0;
+float prev_err = 0;
+float total_err = 0;
+int u = 0;
 int stored = 0;
 int distance = 0;
+bool distance1 = true;
+bool distance2 = true;
+bool icm = true;
+bool icm_measured = false;
+bool record = false;
+bool sending = false;
+bool pid = false;
+int values[4] = {-1, -1, -1, -1};
+int ldrive = 0;
+int rmin = 40;
+int lmin = 40;
 ///////////// Accelerometer //////////////
 
 enum CommandTypes
 {
-    LP_ACCEL_READINGS,
-    GYRO_READINGS,
-    BOTH_READ,
-    COMPLEMENT_READ,
-    READ_DISTANCE,
-    READ_DISTANCE_2,
-    ASAP,
+    LOG,
+    ICM,
+    DISTANCE1,
+    DISTANCE2,
+    PID,
+    STOP,
+    GAINS,
+    DRIVE,
+    RLIMIT,
+    LLIMIT,
 };
 
 void
@@ -106,268 +136,95 @@ handle_command()
 
     // Handle the command type accordingly
     switch (cmd_type) {
-        /*
-         * Write "PONG" on the GATT characteristic BLE_UUID_TX_STRING
-         */
-        case LP_ACCEL_READINGS:
-            stored_times=0;
-            float a;
+        case LOG:
+            sending = false;
+            record = true;
+            break;
 
-            while(stored_times<ARRAY_LEN){
-              if(myICM.dataReady()){
-                myICM.getAGMT();
-                stamps[stored_times] = (float)millis()/1000.;
-                if(stored_times==0){
-                  pitch[stored_times] = atan2(myICM.accX(),myICM.accZ())*180/M_PI;
-                  roll[stored_times] = atan2(myICM.accY(),myICM.accZ())*180/M_PI;
-                  lp_pitch[stored_times] = atan2(myICM.accX(),myICM.accZ())*180/M_PI;
-                  lp_roll[stored_times] = atan2(myICM.accY(),myICM.accZ())*180/M_PI;
-                }
-                else{
-                  a = (stamps[stored_times]-stamps[stored_times-1]);
-                  a = a/(a+(0.015915*2));
-                  lp_pitch[stored_times] = (lp_pitch[stored_times-1]*(1-a)) + (a * (atan2(myICM.accX(),myICM.accZ())*180/M_PI));
-                  lp_roll[stored_times] = (lp_roll[stored_times-1]*(1-a)) + (a * (atan2(myICM.accY(),myICM.accZ())*180/M_PI));
-                  pitch[stored_times] = atan2(myICM.accX(),myICM.accZ())*180/M_PI;
-                  roll[stored_times] = atan2(myICM.accY(),myICM.accZ())*180/M_PI;
-                }
-                stored_times += 1;
+        case ICM:
+            icm = true;
+            break;
+
+        case DISTANCE1:
+            distance1 = !distance1;
+            break;
+
+        case DISTANCE2:
+            distance2 = !distance2;
+            break;
+
+        case PID:
+            int temp;
+            if(robot_cmd.get_next_value(temp)){
+              goal = temp;
+            }
+            goal = goal % 360;
+            pid = true;
+            currentMillis = millis();
+            curr_err = 0;
+            total_err = 0;
+            icm = true;
+            break;
+
+        case STOP:
+            pid = false;
+            icm = false;
+            icm_measured = false;
+            analogWrite(RIGHT_B_PIN, 0);
+            analogWrite(LEFT_B_PIN, 0);
+            analogWrite(LEFT_F_PIN, 0);
+            analogWrite(RIGHT_F_PIN, 0);
+            if(record){
+              record = false;
+              sending = true;
+            }
+
+            break;
+        
+        case GAINS:
+            float gain;
+            if (robot_cmd.get_next_value(gain)) {
+              kp = gain;
+            }
+            if (robot_cmd.get_next_value(gain)) {
+              ki = gain;
+            }
+            if (robot_cmd.get_next_value(gain)) {
+              kd = gain;
+            }
+            break;
+
+        case DRIVE:
+            icm = true;
+            distance1 = true;
+            distance2 = true;
+            Serial.println("Starting DRIVE");
+            for (int i = 0; i < 4; i++) {
+              robot_cmd.get_next_value(values[i]);
+            }
+            if (values[0] != -1 && values[1] != -1 && values[2] != -1 && values[3] != -1){
+              start = (float)millis();
+              analogWrite(RIGHT_F_PIN, values[0]);
+              analogWrite(LEFT_F_PIN, values[1]);
+              analogWrite(RIGHT_B_PIN, values[2]);
+              analogWrite(LEFT_B_PIN, values[3]);
+              while ((float)millis() - start < 2000) {
                 delay(10);
               }
-            }
-            for(int i=0; i<ARRAY_LEN; i++){
-                tx_estring_value.clear();
-                tx_estring_value.append("LPAcc");
-                tx_estring_value.append(pitch[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(roll[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(lp_pitch[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(lp_roll[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(stamps[i]);
-                tx_characteristic_string.writeValue(tx_estring_value.c_str());
-            }
-
-            break;
-
-        case BOTH_READ:
-            stored_times=0;
-
-            while(stored_times<ARRAY_LEN){
-              if(myICM.dataReady()){
-                stamps[stored_times] = (float)millis()/1000.;
-                myICM.getAGMT();
-                if (stored_times > 0){
-                  dt = stamps[stored_times] - stamps[stored_times-1];
-                  gpitch[stored_times] = gpitch[stored_times-1] + myICM.gyrX()*dt;
-                  groll[stored_times] = groll[stored_times-1] + myICM.gyrY()*dt;
-                  gyaw[stored_times] = gyaw[stored_times-1] + myICM.gyrZ()*dt;
-
-                  a = (stamps[stored_times]-stamps[stored_times-1]) / 1000;
-                  a = a/(a+(0.015915*2));
-                  lp_pitch[stored_times] = (lp_pitch[stored_times-1]*(1-a)) + (a * (atan2(myICM.accX(),myICM.accZ())*180/M_PI));
-                  lp_roll[stored_times] = (lp_roll[stored_times-1]*(1-a)) + (a * (atan2(myICM.accY(),myICM.accZ())*180/M_PI));
-                }
-                else{
-                  dt = stamps[stored_times];
-                  gpitch[stored_times] = myICM.gyrX()*dt;
-                  groll[stored_times] = myICM.gyrY()*dt;
-                  gyaw[stored_times] = myICM.gyrZ()*dt;
-                }
-                stored_times += 1;
-                delay(10);
-              }
-            }
-            for(int i=0; i<ARRAY_LEN; i++){
-                tx_estring_value.clear();
-                tx_estring_value.append("both");
-                tx_estring_value.append(gpitch[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(groll[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(gyaw[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(lp_pitch[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(lp_roll[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(stamps[i]);
-                tx_characteristic_string.writeValue(tx_estring_value.c_str());
-            }
-
-            break;
-
-
-        case GYRO_READINGS:
-            stored_times=0;
-
-            while(stored_times<ARRAY_LEN){
-              if(myICM.dataReady()){
-                stamps[stored_times] = (float)millis()/1000.;
-                myICM.getAGMT();
-                if (stored_times > 0){
-                  dt = stamps[stored_times] - stamps[stored_times-1];
-                  gpitch[stored_times] = gpitch[stored_times-1] + myICM.gyrX()*dt;
-                  groll[stored_times] = groll[stored_times-1] + myICM.gyrY()*dt;
-                  gyaw[stored_times] = gyaw[stored_times-1] + myICM.gyrZ()*dt;
-                }
-                else{
-                  dt = stamps[stored_times];
-                  gpitch[stored_times] = myICM.gyrX()*dt;
-                  groll[stored_times] = myICM.gyrY()*dt;
-                  gyaw[stored_times] = myICM.gyrZ()*dt;
-                }
-                stored_times += 1;
-                delay(10);
-              }
-            }
-            for(int i=0; i<ARRAY_LEN; i++){
-                tx_estring_value.clear();
-                tx_estring_value.append("Gyr");
-                tx_estring_value.append(gpitch[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(groll[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(gyaw[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(stamps[i]);
-                tx_characteristic_string.writeValue(tx_estring_value.c_str());
-            }
-
-            break;
-
-        case COMPLEMENT_READ:
-            stored_times=0;
-            float alpha;
-            alpha = 0.3;
-            while(stored_times<ARRAY_LEN){
-              if(myICM.dataReady()){
-                stamps[stored_times] = (float)millis()/1000.;
-                myICM.getAGMT();
-                if (stored_times > 0){
-                  dt = stamps[stored_times] - stamps[stored_times-1];
-                  lp_pitch[stored_times] =  myICM.gyrX()*dt;
-                  lp_roll[stored_times] = myICM.gyrY()*dt;
-                  gyaw[stored_times] = myICM.gyrZ()*dt;
-                  gpitch[stored_times] = pitch[stored_times-1] + lp_pitch[stored_times];
-                  groll[stored_times] = roll[stored_times-1] + lp_roll[stored_times];
-                  yaw[stored_times] = yaw[stored_times-1] + gyaw[stored_times];
-                  lp_pitch[stored_times] += lp_pitch[stored_times-1];
-                  lp_roll[stored_times] += lp_roll[stored_times-1];
-                  gyaw[stored_times] += gyaw[stored_times-1];
-                }
-                else{
-                  dt = .01;
-                  lp_pitch[0] =  myICM.gyrX()*dt;
-                  lp_roll[0] = myICM.gyrY()*dt;
-                  gyaw[0] = myICM.gyrZ()*dt;
-                  gpitch[0] = lp_pitch[0];
-                  groll[0] = lp_roll[0];
-                  yaw[0] = gyaw[0];
-                }
-                pitch[stored_times] =(atan2(myICM.accX(),myICM.accZ())*180/M_PI);
-                roll[stored_times] = (atan2(myICM.accY(),myICM.accZ())*180/M_PI);
-                pitch[stored_times] = ((1-alpha)*gpitch[stored_times]) + (alpha*pitch[stored_times]);
-                roll[stored_times] = ((1-alpha)*groll[stored_times]) + (alpha*roll[stored_times]);
-                stored_times += 1;
-                delay(10);
-              }
-            }
-            for(int i=0; i<ARRAY_LEN; i++){
-                tx_estring_value.clear();
-                tx_estring_value.append("Comp");
-                tx_estring_value.append(pitch[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(roll[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(yaw[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(lp_pitch[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(lp_roll[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(gyaw[i]);
-                tx_estring_value.append(" ");
-                tx_estring_value.append(stamps[i]);
-                tx_characteristic_string.writeValue(tx_estring_value.c_str());
-            }
-
-            break;
-
-        case READ_DISTANCE:
-            distance = 0;
-            for (int i = 0; i < 10; i++){
-              distanceSensor2.startRanging(); //Write configuration bytes to initiate measurement
-              while (!distanceSensor2.checkForDataReady())
-              {
-                delay(1);
-              }
-              distance = distanceSensor2.getDistance(); //Get the result of the measurement from the sensor
-              distanceSensor2.clearInterrupt();
-              distanceSensor2.stopRanging();
-
-              tx_estring_value.clear();
-              tx_estring_value.append("TOF");
-              tx_estring_value.append(distance);
-              tx_characteristic_string.writeValue(tx_estring_value.c_str());
-            }
-
-            break;
-
-        case READ_DISTANCE_2:
-            Serial.println("starting distance2");
-            distance = 0;
-            start = millis();
-            stored = 0;
-            distanceSensor2.startRanging(); //Write configuration bytes to initiate measurement
-            distanceSensor.startRanging();
-            while (stored < 51){
-              if(distanceSensor2.checkForDataReady() && distanceSensor.checkForDataReady()) {
-                distances_a[stored] = distanceSensor.getDistance(); //Get the result of the measurement from the sensor
-                distances_b[stored] = distanceSensor2.getDistance();
-                stamps[stored] = millis();
-
-                distanceSensor2.clearInterrupt();
-                distanceSensor.clearInterrupt();
-                // Serial.println(stored);
-                stored += 1;
-              }
-            }
-            distanceSensor2.stopRanging(); //Write configuration bytes to initiate measurement
-            distanceSensor.stopRanging();
-            for (int i = 0; i < stored; i++){
-              tx_estring_value.clear();
-              tx_estring_value.append("TOF2");
-              tx_estring_value.append(distances_a[i]);
-              tx_estring_value.append(" ");
-              tx_estring_value.append(distances_b[i]);
-              tx_estring_value.append(" ");
-              tx_estring_value.append(stamps[i]);
-              tx_characteristic_string.writeValue(tx_estring_value.c_str());
-            }
-            Serial.println("finished distance2");
-            break;
-
-        case ASAP:
-            distanceSensor.startRanging();
-            distanceSensor2.startRanging();
-            start = millis();
-            while(millis() - start < 5000){
-              if(distanceSensor2.checkForDataReady() && distanceSensor.checkForDataReady()){
-                Serial.println(millis());
-                // Serial.print("Distance1: ");
-                // Serial.print(distanceSensor.getDistance());
-                // Serial.println(" mm");
-                // Serial.print("Distance2: ");
-                // Serial.print(distanceSensor2.getDistance());
-                // Serial.println(" mm");
-                distanceSensor2.clearInterrupt();
-                distanceSensor.clearInterrupt();
-              }
+              analogWrite(RIGHT_F_PIN, 0);
+              analogWrite(LEFT_F_PIN, 0);
+              analogWrite(RIGHT_B_PIN, 0);
+              analogWrite(LEFT_B_PIN, 0);
             }
             break;
+        
+        case RLIMIT:
+          robot_cmd.get_next_value(rmin);
+          break;
+        
+        case LLIMIT:
+          robot_cmd.get_next_value(lmin);
+          break;
 
         default:
             Serial.print("Invalid Command Type: ");
@@ -377,10 +234,87 @@ handle_command()
 }
 
 void
+Log()
+{
+  if (stored < ARRAY_LEN && currentMillis-stamps[stored-1] > 10) {
+    stamps[stored] = currentMillis;
+    // distanceSensor2.startRanging();
+    // if (distance2){
+    //   while(!distanceSensor2.checkForDataReady()) {
+    //     delay(1);
+    //   }
+    //   distances_b[stored] = distanceSensor2.getDistance() * 0.0393701 / 12.0;
+    //   distanceSensor2.clearInterrupt();
+    // }
+    // else {
+    //   distances_b[stored] = 0;
+    // }
+    // distanceSensor2.stopRanging();
+    // distanceSensor.startRanging();
+    // if (distance1){
+    //   while(!distanceSensor.checkForDataReady()) {
+    //     delay(1);
+    //   }
+    //   distances_a[stored] = distanceSensor.getDistance() * 0.0393701 / 12.0;
+    //   distanceSensor.clearInterrupt();
+    // }
+    // else {
+    //   distances_a[stored] = 0;
+    // }
+    // distanceSensor.stopRanging();
+    if(icm){
+      gyaw[stored] = yaw;
+      // pitch[stored] =(atan2(myICM.accX(),myICM.accZ())*180/M_PI);
+      // roll[stored] = (atan2(myICM.accY(),myICM.accZ())*180/M_PI);
+      // pitch[stored] = ((1-alpha)*gpitch[stored]) + (alpha*pitch[stored]);
+      // roll[stored] = ((1-alpha)*groll[stored]) + (alpha*roll[stored]);
+    }
+    kps[stored] = P;
+    kis[stored] = I;
+    kds[stored] = D;
+    stored += 1;
+  }
+  if(stored >= ARRAY_LEN) {
+    record = false;
+    sending = true;
+  }
+}
+
+void
+send()
+{
+  if(stored > 0) {
+    tx_estring_value.clear();
+    // tx_estring_value.append(gpitch[i]);
+    // tx_estring_value.append(" ");
+    // tx_estring_value.append(groll[i]);
+    // tx_estring_value.append(" ");
+    tx_estring_value.append(gyaw[stored - 1]);
+    tx_estring_value.append(" ");
+    // tx_estring_value.append(distances_a[i]);
+    // tx_estring_value.append(" ");
+    // tx_estring_value.append(distances_b[i]);
+    // tx_estring_value.append(" ");
+    tx_estring_value.append(kps[stored - 1]);
+    tx_estring_value.append(" ");
+    tx_estring_value.append(kis[stored - 1]);
+    tx_estring_value.append(" ");
+    tx_estring_value.append(kds[stored - 1]);
+    tx_estring_value.append(" ");
+    tx_estring_value.append(stamps[stored - 1]);
+    tx_characteristic_string.writeValue(tx_estring_value.c_str());
+    stored = stored - 1;
+  }
+
+  if(stored == 0) {
+    sending = false;
+  }
+}
+
+void
 setup()
 {
     Serial.begin(115200);
-    record = true;
 
     BLE.begin();
 
@@ -427,19 +361,22 @@ setup()
 
     Wire.begin();
     Wire.setClock(400000);
-    // bool initialized = false;
-    // while( !initialized )
-    // {
-    //   myICM.begin( Wire, AD0_VAL );
-    //   Serial.print( F("Initialization of the sensor returned: ") );
-    //   Serial.println( myICM.statusString() );
-    //   if( myICM.status != ICM_20948_Stat_Ok ){
-    //     Serial.println( "Trying again..." );
-    //     delay(500);
-    //   }else{
-    //     initialized = true;
-    //   }
-    // }
+    bool initialized = false;
+    while( !initialized )
+    {
+      myICM.begin( Wire, AD0_VAL );
+      Serial.print( F("Initialization of the sensor returned: ") );
+      Serial.println( myICM.statusString() );
+      if( myICM.status != ICM_20948_Stat_Ok ){
+        Serial.println( "Trying again..." );
+        delay(500);
+      }else{
+        initialized = true;
+      }
+    }
+    ICM_20948_fss_t myFSS;
+    myFSS.g = dps2000;
+    myICM.setFullScale((ICM_20948_Internal_Acc | ICM_20948_Internal_Gyr), myFSS) ;
     pinMode(SHUTDOWN_PIN, OUTPUT);
     digitalWrite(SHUTDOWN_PIN, LOW);
     distanceSensor.setI2CAddress(80);
@@ -457,28 +394,18 @@ setup()
       while (1)
         ;
     }
-    distanceSensor2.setDistanceModeShort();
-    distanceSensor.setDistanceModeShort();
+  distanceSensor2.setDistanceModeLong();
+  distanceSensor.setDistanceModeLong();
   Serial.println("Sensor 2 online!");
-}
 
-void
-write_data()
-{
-    currentMillis = millis();
-    if (currentMillis - previousMillis > interval) {
-
-        tx_float_value = tx_float_value + 0.5;
-        tx_characteristic_float.writeValue(tx_float_value);
-
-        if (tx_float_value > 10000) {
-            tx_float_value = 0;
-            
-        }
-
-        previousMillis = currentMillis;
-    }
-
+  pinMode(RIGHT_F_PIN, OUTPUT);
+  pinMode(RIGHT_B_PIN, OUTPUT);
+  pinMode(LEFT_F_PIN, OUTPUT);
+  pinMode(LEFT_B_PIN, OUTPUT);
+  analogWrite(RIGHT_F_PIN, 0);
+  analogWrite(RIGHT_B_PIN, 0);
+  analogWrite(LEFT_F_PIN, 0);
+  analogWrite(LEFT_B_PIN, 0);
 }
 
 void
@@ -491,6 +418,62 @@ read_data()
 }
 
 void
+Pid()
+{
+  if (myICM.dataReady()){
+    myICM.getAGMT();
+    previousMillis = currentMillis;
+    currentMillis = millis();
+    dt = (currentMillis - previousMillis) / 1000;
+
+    if(!icm_measured){
+      yaw = myICM.gyrZ()*dt;
+      goal = yaw + goal;
+      icm_measured = true;
+    }
+    else {
+      yaw += myICM.gyrZ()*dt;
+    }
+
+    prev_err = curr_err;
+    curr_err = yaw - goal;
+
+    total_err += curr_err*dt;
+
+    P = kp * curr_err;
+    if (P > 200) {
+      P = 200;
+    }
+    if (P < -200) {
+      P = -200;
+    }
+
+    I = ki * total_err;
+    if (I > 200) {
+      I = 200;
+    }
+    if (I < -200) {
+      I = -200;
+    }
+
+    D = kd * (curr_err - prev_err)/dt;
+    if (D > 200) {
+      D = 200;
+    }
+    if (D < -200) {
+      D = -200;
+    }
+    u = P + I + D;
+    if (u > 200) {
+      u = 200;
+    }
+    if (u < -200) {
+      u = -200;
+    }
+  }
+}
+
+void
 loop()
 {
     // Listen for connections
@@ -500,17 +483,48 @@ loop()
     if (central) {
         Serial.print("Connected to: ");
         Serial.println(central.address());
-        record = true;
 
         // While central is connected
         while (central.connected()) {
-            // Send data
-            write_data();
 
             // Read data
             read_data();
+            if (pid){
+              // execute pid
+              Pid();
+              ldrive = (int)((u/200)*(255 - lmin));
+              if (u < 5 && u > -5) {
+                analogWrite(RIGHT_B_PIN, 0);
+                analogWrite(LEFT_B_PIN, 0);
+                analogWrite(LEFT_F_PIN, 0);
+                analogWrite(RIGHT_F_PIN, 0);
+              }
+              else if (u < 0) {
+                analogWrite(RIGHT_B_PIN, 0);
+                analogWrite(LEFT_B_PIN, -1*ldrive+lmin);
+                // analogWrite(LEFT_B_PIN, 0);
+                analogWrite(LEFT_F_PIN, 0);
+                analogWrite(RIGHT_F_PIN, -1*(ldrive)+rmin);
+              }
+              else {
+                analogWrite(RIGHT_F_PIN, 0);
+                analogWrite(LEFT_F_PIN, ldrive+lmin);
+                analogWrite(LEFT_B_PIN, 0);
+                // analogWrite(RIGHT_B_PIN, 0);
+                analogWrite(RIGHT_B_PIN, ldrive+lmin);
+              }
+            }
+            if(record){
+              Log();
+            }
+            if(sending){
+              send();
+            }
         }
-
         Serial.println("Disconnected");
+        analogWrite(RIGHT_B_PIN, 0);
+        analogWrite(LEFT_B_PIN, 0);
+        analogWrite(LEFT_F_PIN, 0);
+        analogWrite(RIGHT_F_PIN, 0);
     }
 }
