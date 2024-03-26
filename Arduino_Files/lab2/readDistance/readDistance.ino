@@ -55,6 +55,7 @@ void setup(void)
     while (1)
       ;
   }
+  distanceSensor.setDistanceModeLong();
   Serial.println("Sensor 2 online!");
 }
 
@@ -77,22 +78,22 @@ void loop(void)
   Serial.print(distanceInches);
   Serial.print("in");
 
-  distanceSensor2.startRanging(); //Write configuration bytes to initiate measurement
-  while (!distanceSensor2.checkForDataReady())
-  {
-    delay(1);
-  }
-  float distance2 = distanceSensor2.getDistance(); //Get the result of the measurement from the sensor
-  distanceSensor2.clearInterrupt();
-  distanceSensor2.stopRanging();
+  // distanceSensor2.startRanging(); //Write configuration bytes to initiate measurement
+  // while (!distanceSensor2.checkForDataReady())
+  // {
+  //   delay(1);
+  // }
+  // float distance2 = distanceSensor2.getDistance(); //Get the result of the measurement from the sensor
+  // distanceSensor2.clearInterrupt();
+  // distanceSensor2.stopRanging();
 
-  float distanceInches2= distance2 * 0.0393701;
-  float distanceFeet2 = distanceInches2 / 12.0;
-  Serial.print("\tDistance2(ft): ");
-  Serial.print(distanceFeet2);
-  Serial.print("ft ");
-  Serial.print(distanceInches2);
-  Serial.print("in");
+  // float distanceInches2= distance2 * 0.0393701;
+  // float distanceFeet2 = distanceInches2 / 12.0;
+  // Serial.print("\tDistance2(ft): ");
+  // Serial.print(distanceFeet2);
+  // Serial.print("ft ");
+  // Serial.print(distanceInches2);
+  // Serial.print("in");
 
   Serial.println();
 }

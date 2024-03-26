@@ -57,6 +57,7 @@ SFEVL53L1X distanceSensor2(Wire, SHUTDOWN_PIN, INTERRUPT_PIN);
 ICM_20948_I2C myICM;  // Otherwise create an ICM_20948_I2C object
 
 float currentMillis = 0;
+float recordMillis = 0;
 float stamps[ARRAY_LEN];
 float gpitch[ARRAY_LEN];
 float groll[ARRAY_LEN];
@@ -66,6 +67,10 @@ float distances_b[ARRAY_LEN];
 float kps[ARRAY_LEN];
 float kis[ARRAY_LEN];
 float kds[ARRAY_LEN];
+float fl[ARRAY_LEN];
+float bl[ARRAY_LEN];
+float fr[ARRAY_LEN];
+float br[ARRAY_LEN];
 int stored_times = 0;
 float dt = 0;
 float initial = 0;
@@ -84,18 +89,19 @@ float prev_err = 0;
 float total_err = 0;
 int u = 0;
 int stored = 0;
-int distance = 0;
-bool distance1 = true;
-bool distance2 = true;
-bool icm = true;
+float distance = 0;
+bool distance1 = false;
+bool distance2 = false;
+bool icm = false;
 bool icm_measured = false;
 bool record = false;
 bool sending = false;
 bool pid = false;
-int values[4] = {-1, -1, -1, -1};
 int ldrive = 0;
 int rmin = 40;
 int lmin = 40;
+float dspeed = 0;
+bool arrived = false;
 ///////////// Accelerometer //////////////
 
 enum CommandTypes
@@ -110,6 +116,7 @@ enum CommandTypes
     DRIVE,
     RLIMIT,
     LLIMIT,
+    UNTIL,
 };
 
 void
@@ -146,11 +153,13 @@ handle_command()
             break;
 
         case DISTANCE1:
-            distance1 = !distance1;
+            distance1 = true;
+            distanceSensor.startRanging();
+
             break;
 
         case DISTANCE2:
-            distance2 = !distance2;
+            distance2 = true;
             break;
 
         case PID:
@@ -163,17 +172,16 @@ handle_command()
             currentMillis = millis();
             curr_err = 0;
             total_err = 0;
-            icm = true;
             break;
 
         case STOP:
             pid = false;
-            icm = false;
             icm_measured = false;
             analogWrite(RIGHT_B_PIN, 0);
             analogWrite(LEFT_B_PIN, 0);
             analogWrite(LEFT_F_PIN, 0);
             analogWrite(RIGHT_F_PIN, 0);
+            distanceSensor.stopRanging();
             if(record){
               record = false;
               sending = true;
@@ -195,27 +203,31 @@ handle_command()
             break;
 
         case DRIVE:
-            icm = true;
-            distance1 = true;
-            distance2 = true;
-            Serial.println("Starting DRIVE");
-            for (int i = 0; i < 4; i++) {
-              robot_cmd.get_next_value(values[i]);
-            }
-            if (values[0] != -1 && values[1] != -1 && values[2] != -1 && values[3] != -1){
-              start = (float)millis();
-              analogWrite(RIGHT_F_PIN, values[0]);
-              analogWrite(LEFT_F_PIN, values[1]);
-              analogWrite(RIGHT_B_PIN, values[2]);
-              analogWrite(LEFT_B_PIN, values[3]);
-              while ((float)millis() - start < 2000) {
-                delay(10);
-              }
+            robot_cmd.get_next_value(dspeed);
+            dspeed = dspeed/100.0;
+            Serial.println(dspeed);
+            if(dspeed<0){
+              dspeed = (-155.0*dspeed) + 100.0;
               analogWrite(RIGHT_F_PIN, 0);
               analogWrite(LEFT_F_PIN, 0);
+              analogWrite(RIGHT_B_PIN, dspeed*0.8);
+              analogWrite(LEFT_B_PIN, dspeed);
+            }
+            else{
+              dspeed = (215.0*dspeed) + 40.0;
+              analogWrite(RIGHT_F_PIN, dspeed*0.5);
+              analogWrite(LEFT_F_PIN, dspeed);
               analogWrite(RIGHT_B_PIN, 0);
               analogWrite(LEFT_B_PIN, 0);
             }
+            start = (float)millis();
+            while ((float)millis() - start < 2000) {
+              delay(10);
+            }
+            analogWrite(RIGHT_F_PIN, 0);
+            analogWrite(LEFT_F_PIN, 0);
+            analogWrite(RIGHT_B_PIN, 0);
+            analogWrite(LEFT_B_PIN, 0);
             break;
         
         case RLIMIT:
@@ -225,6 +237,61 @@ handle_command()
         case LLIMIT:
           robot_cmd.get_next_value(lmin);
           break;
+        
+        case UNTIL:
+            Serial.println(distanceSensor.getDistanceMode());
+            arrived = false;
+            stored = 0;
+            robot_cmd.get_next_value(goal);
+            robot_cmd.get_next_value(dspeed);
+
+            dspeed = dspeed / 100;
+            dspeed = (215.0*dspeed) + 40.0;
+            analogWrite(RIGHT_F_PIN, dspeed*0.5);
+            analogWrite(LEFT_F_PIN, dspeed);
+            analogWrite(RIGHT_B_PIN, 0);
+            analogWrite(LEFT_B_PIN, 0);
+            distanceSensor.startRanging();
+
+            start = (float)millis();
+            while (!arrived) {
+              if (distanceSensor.checkForDataReady()){
+                distance = distanceSensor.getDistance() * 0.0393701 / 12.0;
+                distanceSensor.clearInterrupt();
+                distances_a[stored] = distance;
+                stamps[stored] = millis();
+                fl[stored] = dspeed;
+                fr[stored] = dspeed*0.5;
+                stored += 1;
+                if (distance - goal < .5) {
+                  arrived = true;
+                }
+              }
+            }
+            analogWrite(RIGHT_F_PIN, 255);
+            analogWrite(LEFT_F_PIN, 255);
+            analogWrite(RIGHT_B_PIN, 255);
+            analogWrite(LEFT_B_PIN, 255);
+            delay(1000);
+            analogWrite(RIGHT_F_PIN, 0);
+            analogWrite(LEFT_F_PIN, 0);
+            analogWrite(RIGHT_B_PIN, 0);
+            analogWrite(LEFT_B_PIN, 0);
+            while(stored > 0) {
+              tx_estring_value.clear();
+              tx_estring_value.append("M");
+              tx_estring_value.append(distances_a[stored - 1]);
+              tx_estring_value.append(" ");
+              tx_estring_value.append(fl[stored - 1]);
+              tx_estring_value.append(" ");
+              tx_estring_value.append(fr[stored - 1]);
+              tx_estring_value.append(" ");
+              tx_estring_value.append(stamps[stored - 1]);
+              tx_characteristic_string.writeValue(tx_estring_value.c_str());
+              stored = stored - 1;
+            }
+
+            break;
 
         default:
             Serial.print("Invalid Command Type: ");
@@ -236,8 +303,16 @@ handle_command()
 void
 Log()
 {
-  if (stored < ARRAY_LEN && currentMillis-stamps[stored-1] > 10) {
+  // Serial.println("Recording");
+  if (stored == 0 || (stored < ARRAY_LEN && currentMillis - recordMillis > 10)) {
+    // Serial.print("Stored: ");
+    // Serial.println(stored);
+    // Serial.print("Current : ");
+    // Serial.println(currentMillis);
+    // Serial.print("Last: ");
+    // Serial.println(recordMillis);
     stamps[stored] = currentMillis;
+    recordMillis = currentMillis;
     // distanceSensor2.startRanging();
     // if (distance2){
     //   while(!distanceSensor2.checkForDataReady()) {
@@ -250,18 +325,9 @@ Log()
     //   distances_b[stored] = 0;
     // }
     // distanceSensor2.stopRanging();
-    // distanceSensor.startRanging();
-    // if (distance1){
-    //   while(!distanceSensor.checkForDataReady()) {
-    //     delay(1);
-    //   }
-    //   distances_a[stored] = distanceSensor.getDistance() * 0.0393701 / 12.0;
-    //   distanceSensor.clearInterrupt();
-    // }
-    // else {
-    //   distances_a[stored] = 0;
-    // }
-    // distanceSensor.stopRanging();
+    if(distance1){
+      distances_a[stored] = distance;
+    }
     if(icm){
       gyaw[stored] = yaw;
       // pitch[stored] =(atan2(myICM.accX(),myICM.accZ())*180/M_PI);
@@ -275,6 +341,9 @@ Log()
     stored += 1;
   }
   if(stored >= ARRAY_LEN) {
+    if(distance1) {
+      distanceSensor.stopRanging();
+    }
     record = false;
     sending = true;
   }
@@ -284,15 +353,18 @@ void
 send()
 {
   if(stored > 0) {
+    // Serial.print("Sending: ");
+    Serial.println(stored);
     tx_estring_value.clear();
+    tx_estring_value.append("S");
     // tx_estring_value.append(gpitch[i]);
     // tx_estring_value.append(" ");
     // tx_estring_value.append(groll[i]);
     // tx_estring_value.append(" ");
     tx_estring_value.append(gyaw[stored - 1]);
     tx_estring_value.append(" ");
-    // tx_estring_value.append(distances_a[i]);
-    // tx_estring_value.append(" ");
+    tx_estring_value.append(distances_a[stored - 1]);
+    tx_estring_value.append(" ");
     // tx_estring_value.append(distances_b[i]);
     // tx_estring_value.append(" ");
     tx_estring_value.append(kps[stored - 1]);
@@ -307,7 +379,10 @@ send()
   }
 
   if(stored == 0) {
+    // Serial.println("Finished sending");
     sending = false;
+    icm = false;
+    distance1 = false;
   }
 }
 
@@ -396,6 +471,8 @@ setup()
     }
   distanceSensor2.setDistanceModeLong();
   distanceSensor.setDistanceModeLong();
+  // distanceSensor.setTimingBudgetInMs(15);
+  // Serial.println(distanceSensor.getTimingBudgetInMs());
   Serial.println("Sensor 2 online!");
 
   pinMode(RIGHT_F_PIN, OUTPUT);
@@ -418,7 +495,7 @@ read_data()
 }
 
 void
-Pid()
+Orient()
 {
   if (myICM.dataReady()){
     myICM.getAGMT();
@@ -471,6 +548,105 @@ Pid()
       u = -200;
     }
   }
+
+
+  ldrive = (int)((u/200)*(255 - lmin));
+  if (u < 5 && u > -5) {
+    analogWrite(RIGHT_B_PIN, 0);
+    analogWrite(LEFT_B_PIN, 0);
+    analogWrite(LEFT_F_PIN, 0);
+    analogWrite(RIGHT_F_PIN, 0);
+  }
+  else if (u < 0) {
+    analogWrite(RIGHT_B_PIN, 0);
+    analogWrite(LEFT_B_PIN, -1*ldrive+lmin);
+    // analogWrite(LEFT_B_PIN, 0);
+    analogWrite(LEFT_F_PIN, 0);
+    analogWrite(RIGHT_F_PIN, -1*(ldrive)+rmin);
+  }
+  else {
+    analogWrite(RIGHT_F_PIN, 0);
+    analogWrite(LEFT_F_PIN, ldrive+lmin);
+    analogWrite(LEFT_B_PIN, 0);
+    // analogWrite(RIGHT_B_PIN, 0);
+    analogWrite(RIGHT_B_PIN, ldrive+lmin);
+  }
+}
+
+void
+Foot()
+{
+  if (distanceSensor.checkForDataReady()){
+
+    previousMillis = currentMillis;
+    currentMillis = millis();
+    dt = (currentMillis - previousMillis) / 1000;
+
+    distance = distanceSensor.getDistance() * 0.0393701 / 12.0;
+    distanceSensor.clearInterrupt();
+
+    prev_err = curr_err;
+    curr_err = distance - 1;
+
+    total_err += curr_err*dt;
+
+    P = kp * curr_err;
+    if (P > -2.5 && P < 2.5) {
+      P = 0;
+    }
+    if (P > 100) {
+      P = 100;
+    }
+    if (P < -100) {
+      P = -100;
+    }
+
+    I = ki * total_err;
+    if (I > 100) {
+      I = 100;
+    }
+    if (I < -100) {
+      I = -100;
+    }
+
+    D = kd * (curr_err - prev_err)/dt;
+    if (D > 100) {
+      D = 100;
+    }
+    if (D < -100) {
+      D = -100;
+    }
+    u = P + I + D;
+    if (u > 100) {
+      u = 100;
+    }
+    if (u < -100) {
+      u = -100;
+    }
+  }
+
+
+  
+  if (u < 1 && u > -1){
+    analogWrite(RIGHT_B_PIN,0);;
+    analogWrite(LEFT_B_PIN, 0);
+    analogWrite(LEFT_F_PIN, 0);
+    analogWrite(RIGHT_F_PIN, 0);
+  }
+  if (u < 0) {
+    ldrive = (int)(((u/100)*-105)+150);
+    analogWrite(RIGHT_B_PIN, ldrive*0.6);
+    analogWrite(LEFT_B_PIN, ldrive);
+    analogWrite(LEFT_F_PIN, 0);
+    analogWrite(RIGHT_F_PIN, 0);
+  }
+  else {
+    ldrive = (int)(((u/100)*105)+150);
+    analogWrite(RIGHT_F_PIN,  ldrive*0.6);
+    analogWrite(LEFT_F_PIN,  ldrive);
+    analogWrite(LEFT_B_PIN, 0);
+    analogWrite(RIGHT_B_PIN, 0);
+  }
 }
 
 void
@@ -491,27 +667,11 @@ loop()
             read_data();
             if (pid){
               // execute pid
-              Pid();
-              ldrive = (int)((u/200)*(255 - lmin));
-              if (u < 5 && u > -5) {
-                analogWrite(RIGHT_B_PIN, 0);
-                analogWrite(LEFT_B_PIN, 0);
-                analogWrite(LEFT_F_PIN, 0);
-                analogWrite(RIGHT_F_PIN, 0);
-              }
-              else if (u < 0) {
-                analogWrite(RIGHT_B_PIN, 0);
-                analogWrite(LEFT_B_PIN, -1*ldrive+lmin);
-                // analogWrite(LEFT_B_PIN, 0);
-                analogWrite(LEFT_F_PIN, 0);
-                analogWrite(RIGHT_F_PIN, -1*(ldrive)+rmin);
+              if(icm){
+                Orient();
               }
               else {
-                analogWrite(RIGHT_F_PIN, 0);
-                analogWrite(LEFT_F_PIN, ldrive+lmin);
-                analogWrite(LEFT_B_PIN, 0);
-                // analogWrite(RIGHT_B_PIN, 0);
-                analogWrite(RIGHT_B_PIN, ldrive+lmin);
+                Foot();
               }
             }
             if(record){
