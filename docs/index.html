@@ -174,7 +174,7 @@
                             <div class="portfolio-hover">
                                 <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
                             </div>
-                            <img class="img-fluid" src="assets/img/portfolio/lab5/blocked.png" alt="..." />
+                            <img class="img-fluid" src="assets/img/portfolio/lab5/lab5.png" alt="..." />
                         </a>
                         <div class="portfolio-caption">
                             <div class="portfolio-caption-heading">Lab 5: STOP!</div>
@@ -798,11 +798,65 @@
                         <div class="col-lg-8">
                             <div class="modal-body">
                                 <!-- Project details-->
-                                <h2 class="text-uppercase">The illness got me</h2>
-                                <p class="item-intro text-muted"></p>
-                                <img class="col-lg-3" src="assets/img/portfolio/lab5/sick.png"
-                                    alt="..." />
-                                <p><strong>I'll get back to this one!</strong></p>
+                                <h1 class="text-decoration-underline">Lab 5: STOP!</h1>
+                                <div class="text-start">
+                                    <h2 class="text-center">Prelab</h2>
+                                    <p>
+                                        To implement the PID controller I added a bluetooth command that would set a flag, and in my main loop if 
+                                        pid is set, then it calls the Foot() function which will attempt to get a reading and send motor inputs. I 
+                                        also had a STOP command to interrupt the control and stop the robot and send data immediately. Those functions 
+                                        are shown below.
+                                    </p>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab5/Screenshot 2024-03-29 at 10.47.14 PM.png" alt="..."/>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab5/Screenshot 2024-03-29 at 10.47.31 PM.png" alt="..."/>
+                                    <p>
+                                        I also added a record flag that will call a logging function every time the Foot() function is called. Once 
+                                        the arrays were full or STOP was called it would send the stored data. This allowed me to have finer control 
+                                        over what data I recorded as well as allowing me to run the controller as long as I wanted.
+                                    </p>
+                                </div>
+                                <div class="text-start">
+                                    <h2 class="text-center">Lab Tasks</h2>
+                                    <h3>Initial Controller</h3>
+                                    <p>
+                                        To implement this controller I started with a P controller. I decided that a kp gain of 10 would be good 
+                                        because I am measuring distance in feet, so my max distance value is about 13 feet in long distance mode 
+                                        (which the sensor is in), so a gain of 10 makes my P-value range from about -10 to 100, which gives easy 
+                                        scaling for motor inputs by percentages. The else case is for linear extrapolation which is later but the 
+                                        rest simply checks for a new sensor reading and updates current distance and error beliefs. 
+                                    </p>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab5/Screenshot 2024-03-29 at 11.30.14 PM.png" alt="..."/>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab5/Screenshot 2024-03-29 at 11.28.40 PM.png" alt="..."/>
+                                    <p>
+                                        Since u = P and represents a percentage of error, it is easy to scale into a range of motor inputs. Since 
+                                        my motors drive weaker backwards the range for those values is [140, 255] and forward it is [90, 255]. To 
+                                        keep the bot straight I account for my right motor being stronger and give it 30% of that backwards and 50%
+                                        forwards.
+                                    </p>
+                                    <iframe width="560" height="315" src="https://youtube.com/embed/79BJNFI1k4s" frameborder="0"></iframe>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab5/1DV.png" alt="..."/>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab5/1UV.png" alt="..."/>
+                                    <p>
+                                        As you can see in the video the bot stops before it hits the wall (barely) and after some oscillation settles
+                                        at about 1ft from the wall. As you can see though my sensor was starting to experience large semi-random spikes 
+                                        in readings which made it very difficult to implement the integral and derivative part of the controller. Below 
+                                        is a graph I got from holding the robot still for a few seconds, as you can see it occasionally reads very high. 
+                                        Before the sensor started getting erraneous readings I had settled at kp=8, ki=3, kd=0.25. I used the data from 
+                                        that run (below) to determine that the sensor readings were coming in about every 100ms. I then added the else 
+                                        case from above so that the bot could estimate its position based on it's previous readings.
+                                    </p>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab5/brokey.png" alt="..."/>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab5/100ms per.png" alt="..."/>
+                                    <p>
+                                        Below is a video of the P controller running with the extrapolation functionality. I also have added the controller 
+                                        output graph, the spikes correspond to the erroneous readings and the distance measurements are large enough that the 
+                                        graph isn't usable. However I have a screenshot of the sent data and you can see it settles at just under a foot from 
+                                        the wall.
+                                    </p>
+                                    <iframe width="560" height="315" src="https://youtube.com/embed/KJJbWID_wrY" frameborder="0"></iframe>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab5/Screenshot 2024-03-30 at 1.12.34 AM.png" alt="..."/>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab5/Screenshot 2024-03-30 at 1.12.16 AM.png" alt="..."/>
+                                </div>
                                 <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
                                     type="button">
                                     <i class="fas fa-xmark me-1"></i>

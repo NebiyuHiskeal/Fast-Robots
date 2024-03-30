@@ -71,6 +71,7 @@ float fl[ARRAY_LEN];
 float bl[ARRAY_LEN];
 float fr[ARRAY_LEN];
 float br[ARRAY_LEN];
+float speeds[ARRAY_LEN];
 int stored_times = 0;
 float dt = 0;
 float initial = 0;
@@ -83,21 +84,23 @@ float kd = .5;
 float P = 0;
 float I = 0;
 float D = 0;
+float u = 0;
 int goal = 0;
 float curr_err = 0;
 float prev_err = 0;
 float total_err = 0;
-int u = 0;
 int stored = 0;
 float distance = 0;
+float prev_distance = 0;
 bool distance1 = false;
 bool distance2 = false;
 bool icm = false;
 bool icm_measured = false;
+bool dist_measured = false;
 bool record = false;
 bool sending = false;
 bool pid = false;
-int ldrive = 0;
+float ldrive = 0;
 int rmin = 40;
 int lmin = 40;
 float dspeed = 0;
@@ -171,12 +174,16 @@ handle_command()
             pid = true;
             currentMillis = millis();
             curr_err = 0;
+            u = 0;
             total_err = 0;
+            icm_measured = false;
+            dist_measured = false;
             break;
 
         case STOP:
             pid = false;
             icm_measured = false;
+            dist_measured = false;
             analogWrite(RIGHT_B_PIN, 0);
             analogWrite(LEFT_B_PIN, 0);
             analogWrite(LEFT_F_PIN, 0);
@@ -207,14 +214,14 @@ handle_command()
             dspeed = dspeed/100.0;
             Serial.println(dspeed);
             if(dspeed<0){
-              dspeed = (-155.0*dspeed) + 100.0;
+              dspeed = (-235.0*dspeed) + 20.0;
               analogWrite(RIGHT_F_PIN, 0);
               analogWrite(LEFT_F_PIN, 0);
-              analogWrite(RIGHT_B_PIN, dspeed*0.8);
+              analogWrite(RIGHT_B_PIN, dspeed*0.3);
               analogWrite(LEFT_B_PIN, dspeed);
             }
             else{
-              dspeed = (215.0*dspeed) + 40.0;
+              dspeed = (165.0*dspeed) + 90.0;
               analogWrite(RIGHT_F_PIN, dspeed*0.5);
               analogWrite(LEFT_F_PIN, dspeed);
               analogWrite(RIGHT_B_PIN, 0);
@@ -239,7 +246,7 @@ handle_command()
           break;
         
         case UNTIL:
-            Serial.println(distanceSensor.getDistanceMode());
+            // Serial.println(distanceSensor.getDistanceMode());
             arrived = false;
             stored = 0;
             robot_cmd.get_next_value(goal);
@@ -338,6 +345,7 @@ Log()
     kps[stored] = P;
     kis[stored] = I;
     kds[stored] = D;
+    speeds[stored] = ldrive;
     stored += 1;
   }
   if(stored >= ARRAY_LEN) {
@@ -354,7 +362,7 @@ send()
 {
   if(stored > 0) {
     // Serial.print("Sending: ");
-    Serial.println(stored);
+    // Serial.println(stored);
     tx_estring_value.clear();
     tx_estring_value.append("S");
     // tx_estring_value.append(gpitch[i]);
@@ -372,6 +380,8 @@ send()
     tx_estring_value.append(kis[stored - 1]);
     tx_estring_value.append(" ");
     tx_estring_value.append(kds[stored - 1]);
+    tx_estring_value.append(" ");
+    tx_estring_value.append(speeds[stored - 1]);
     tx_estring_value.append(" ");
     tx_estring_value.append(stamps[stored - 1]);
     tx_characteristic_string.writeValue(tx_estring_value.c_str());
@@ -547,6 +557,9 @@ Orient()
     if (u < -200) {
       u = -200;
     }
+    if (record) {
+      Log();
+    }
   }
 
 
@@ -576,76 +589,84 @@ Orient()
 void
 Foot()
 {
+    
   if (distanceSensor.checkForDataReady()){
-
     previousMillis = currentMillis;
     currentMillis = millis();
     dt = (currentMillis - previousMillis) / 1000;
-
+    prev_distance = distance;
     distance = distanceSensor.getDistance() * 0.0393701 / 12.0;
     distanceSensor.clearInterrupt();
+  }
+  else {
+    int temp = (distance - prev_distance) / (dt*1000);
+    prev_distance = distance;
+    previousMillis = currentMillis;
+    currentMillis = millis();
+    dt = (currentMillis - previousMillis) / 1000;
+    distance += temp*dt;
+  }
+  prev_err = curr_err;
+  curr_err = distance - 1;
 
-    prev_err = curr_err;
-    curr_err = distance - 1;
+  total_err += curr_err*dt;
 
-    total_err += curr_err*dt;
-
-    P = kp * curr_err;
-    if (P > -2.5 && P < 2.5) {
-      P = 0;
-    }
-    if (P > 100) {
-      P = 100;
-    }
-    if (P < -100) {
-      P = -100;
-    }
-
-    I = ki * total_err;
-    if (I > 100) {
-      I = 100;
-    }
-    if (I < -100) {
-      I = -100;
-    }
-
-    D = kd * (curr_err - prev_err)/dt;
-    if (D > 100) {
-      D = 100;
-    }
-    if (D < -100) {
-      D = -100;
-    }
-    u = P + I + D;
-    if (u > 100) {
-      u = 100;
-    }
-    if (u < -100) {
-      u = -100;
-    }
+  P = kp * curr_err;
+  if (P > 70) {
+    P = 100;
+  }
+  if (P < -100) {
+    P = -100;
   }
 
+  I = ki * total_err;
+  if (I > 100) {
+    I = 100;
+  }
+  if (I < -100) {
+    I = -100;
+  }
 
-  
-  if (u < 1 && u > -1){
+  D = kd * (curr_err - prev_err)/dt;
+  if (!dist_measured) {
+    D = 0;
+    dist_measured = true;
+  }
+  if (D > 100) {
+    D = 100;
+  }
+  if (D < -100) {
+    D = -100;
+  }
+  u = P + I + D;
+  if (u > 100) {
+    u = 100;
+  }
+  if (u < -100) {
+    u = -100;
+  }
+  if (u < 0.25 && u > -0.25){
     analogWrite(RIGHT_B_PIN,0);;
     analogWrite(LEFT_B_PIN, 0);
     analogWrite(LEFT_F_PIN, 0);
     analogWrite(RIGHT_F_PIN, 0);
   }
-  if (u < 0) {
-    ldrive = (int)(((u/100)*-105)+150);
-    analogWrite(RIGHT_B_PIN, ldrive*0.6);
-    analogWrite(LEFT_B_PIN, ldrive);
+  else if (u < 0) {
+    ldrive = -115.0*(u/100.0) + 140.0;
+    analogWrite(RIGHT_B_PIN, ldrive*0.3);
+    analogWrite(LEFT_B_PIN, 1*ldrive);
     analogWrite(LEFT_F_PIN, 0);
     analogWrite(RIGHT_F_PIN, 0);
   }
   else {
-    ldrive = (int)(((u/100)*105)+150);
-    analogWrite(RIGHT_F_PIN,  ldrive*0.6);
+    ldrive = 165.0*(u/100.0) + 90.0;
+    analogWrite(RIGHT_F_PIN,  ldrive*0.5);
     analogWrite(LEFT_F_PIN,  ldrive);
     analogWrite(LEFT_B_PIN, 0);
     analogWrite(RIGHT_B_PIN, 0);
+  }
+  if (record) {
+    Log();
   }
 }
 
@@ -674,9 +695,9 @@ loop()
                 Foot();
               }
             }
-            if(record){
-              Log();
-            }
+            // if(record){
+            //   Log();
+            // }
             if(sending){
               send();
             }
