@@ -72,11 +72,11 @@ void loop(void)
 
   float distanceInches= distance * 0.0393701;
   float distanceFeet = distanceInches / 12.0;
-  Serial.print("Distance1(ft): ");
+  // Serial.print("Distance1(ft): ");
   Serial.print(distanceFeet);
-  Serial.print("ft ");
-  Serial.print(distanceInches);
-  Serial.print("in");
+  // Serial.print("ft ");
+  // Serial.print(distanceInches);
+  // Serial.print("in");
 
   // distanceSensor2.startRanging(); //Write configuration bytes to initiate measurement
   // while (!distanceSensor2.checkForDataReady())

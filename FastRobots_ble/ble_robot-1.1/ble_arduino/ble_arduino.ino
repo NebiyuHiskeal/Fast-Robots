@@ -72,6 +72,7 @@ float bl[ARRAY_LEN];
 float fr[ARRAY_LEN];
 float br[ARRAY_LEN];
 float speeds[ARRAY_LEN];
+bool sensor[ARRAY_LEN];
 int stored_times = 0;
 float dt = 0;
 float initial = 0;
@@ -101,10 +102,12 @@ bool record = false;
 bool sending = false;
 bool pid = false;
 float ldrive = 0;
-int rmin = 40;
-int lmin = 40;
+float rmin = 40;
+float lmin = 40;
 float dspeed = 0;
 bool arrived = false;
+bool ready = false;
+int temp;
 ///////////// Accelerometer //////////////
 
 enum CommandTypes
@@ -178,6 +181,9 @@ handle_command()
             total_err = 0;
             icm_measured = false;
             dist_measured = false;
+            distance = -1;
+            prev_distance = -1;
+            initial = -1;
             break;
 
         case STOP:
@@ -346,6 +352,7 @@ Log()
     kis[stored] = I;
     kds[stored] = D;
     speeds[stored] = ldrive;
+    sensor[stored] = ready;
     stored += 1;
   }
   if(stored >= ARRAY_LEN) {
@@ -384,6 +391,8 @@ send()
     tx_estring_value.append(speeds[stored - 1]);
     tx_estring_value.append(" ");
     tx_estring_value.append(stamps[stored - 1]);
+    tx_estring_value.append(" ");
+    tx_estring_value.append(sensor[stored - 1]);
     tx_characteristic_string.writeValue(tx_estring_value.c_str());
     stored = stored - 1;
   }
@@ -508,6 +517,7 @@ void
 Orient()
 {
   if (myICM.dataReady()){
+    ready = true;
     myICM.getAGMT();
     previousMillis = currentMillis;
     currentMillis = millis();
@@ -557,32 +567,50 @@ Orient()
     if (u < -200) {
       u = -200;
     }
-    if (record) {
-      Log();
-    }
+  }
+  else {
+    ready = false;
   }
 
 
   ldrive = (int)((u/200)*(255 - lmin));
   if (u < 5 && u > -5) {
-    analogWrite(RIGHT_B_PIN, 0);
-    analogWrite(LEFT_B_PIN, 0);
-    analogWrite(LEFT_F_PIN, 0);
-    analogWrite(RIGHT_F_PIN, 0);
+    if (initial == -1) {
+      initial = currentMillis;
+    }
+    if (currentMillis - initial < 1500) {
+      analogWrite(RIGHT_B_PIN, 0);
+      analogWrite(LEFT_B_PIN, 0);
+      analogWrite(LEFT_F_PIN, 220);
+      analogWrite(RIGHT_F_PIN, 110);
+    }
+    else {
+      analogWrite(RIGHT_B_PIN, 0);
+      analogWrite(LEFT_B_PIN, 0);
+      analogWrite(LEFT_F_PIN, 0);
+      analogWrite(RIGHT_F_PIN, 0);
+    }
+    // analogWrite(RIGHT_B_PIN, 0);
+    // analogWrite(LEFT_B_PIN, 0);
+    // analogWrite(LEFT_F_PIN, 0);
+    // analogWrite(RIGHT_F_PIN, 0);
   }
   else if (u < 0) {
     analogWrite(RIGHT_B_PIN, 0);
-    analogWrite(LEFT_B_PIN, -1*ldrive+lmin);
+    analogWrite(LEFT_B_PIN, -1*ldrive+130);
     // analogWrite(LEFT_B_PIN, 0);
     analogWrite(LEFT_F_PIN, 0);
-    analogWrite(RIGHT_F_PIN, -1*(ldrive)+rmin);
+    analogWrite(RIGHT_F_PIN, -1*(ldrive)+100);
   }
   else {
     analogWrite(RIGHT_F_PIN, 0);
-    analogWrite(LEFT_F_PIN, ldrive+lmin);
+    analogWrite(LEFT_F_PIN, ldrive+130);
     analogWrite(LEFT_B_PIN, 0);
     // analogWrite(RIGHT_B_PIN, 0);
-    analogWrite(RIGHT_B_PIN, ldrive+lmin);
+    analogWrite(RIGHT_B_PIN, ldrive+130);
+  }
+  if (record) {
+    Log();
   }
 }
 
@@ -591,32 +619,43 @@ Foot()
 {
     
   if (distanceSensor.checkForDataReady()){
+    ready = true;
     previousMillis = currentMillis;
     currentMillis = millis();
-    dt = (currentMillis - previousMillis) / 1000;
+    dt = (currentMillis - previousMillis);
     prev_distance = distance;
     distance = distanceSensor.getDistance() * 0.0393701 / 12.0;
     distanceSensor.clearInterrupt();
+    if (!dist_measured){
+      prev_distance = distance;
+      dist_measured = true;
+    }
+    temp = (distance - prev_distance) / dt;
   }
   else {
-    int temp = (distance - prev_distance) / (dt*1000);
-    prev_distance = distance;
-    previousMillis = currentMillis;
-    currentMillis = millis();
-    dt = (currentMillis - previousMillis) / 1000;
-    distance += temp*dt;
+    if (dist_measured) {
+      ready = false;
+      prev_distance = distance;
+      previousMillis = currentMillis;
+      currentMillis = millis();
+      dt = (currentMillis - previousMillis);
+      distance = prev_distance + temp*dt;
+    }
   }
   prev_err = curr_err;
-  curr_err = distance - 1;
+  curr_err = distance - goal;
 
   total_err += curr_err*dt;
 
   P = kp * curr_err;
+  if (!dist_measured) {
+    P = 0;
+  }
   if (P > 70) {
     P = 100;
   }
-  if (P < -100) {
-    P = -100;
+  if (P < 2) {
+    P = 0;
   }
 
   I = ki * total_err;
@@ -630,7 +669,6 @@ Foot()
   D = kd * (curr_err - prev_err)/dt;
   if (!dist_measured) {
     D = 0;
-    dist_measured = true;
   }
   if (D > 100) {
     D = 100;
@@ -645,29 +683,42 @@ Foot()
   if (u < -100) {
     u = -100;
   }
-  if (u < 0.25 && u > -0.25){
-    analogWrite(RIGHT_B_PIN,0);;
-    analogWrite(LEFT_B_PIN, 0);
+  // if (u < 0.25 && u > -0.25){
+  if ( u < 0.25 && dist_measured ) {
+    analogWrite(LEFT_B_PIN, 255);
+    analogWrite(RIGHT_B_PIN, 255);
     analogWrite(LEFT_F_PIN, 0);
     analogWrite(RIGHT_F_PIN, 0);
+    delay(10);
+    icm = true;
+    goal = 180;
+    kp = 1;
+    Orient();
   }
-  else if (u < 0) {
-    ldrive = -115.0*(u/100.0) + 140.0;
-    analogWrite(RIGHT_B_PIN, ldrive*0.3);
-    analogWrite(LEFT_B_PIN, 1*ldrive);
-    analogWrite(LEFT_F_PIN, 0);
-    analogWrite(RIGHT_F_PIN, 0);
-  }
+  // else if (u < 0) {
+  //   ldrive = -115.0*(u/100.0) + 140.0;
+  //   analogWrite(LEFT_B_PIN, 1*ldrive);
+  //   analogWrite(RIGHT_B_PIN, ldrive*0.3);
+  //   // analogWrite(LEFT_B_PIN, 0);
+  //   // analogWrite(RIGHT_B_PIN, 0);
+  //   analogWrite(LEFT_F_PIN, 0);
+  //   analogWrite(RIGHT_F_PIN, 0);
+  // }
   else {
-    ldrive = 165.0*(u/100.0) + 90.0;
-    analogWrite(RIGHT_F_PIN,  ldrive*0.5);
-    analogWrite(LEFT_F_PIN,  ldrive);
-    analogWrite(LEFT_B_PIN, 0);
-    analogWrite(RIGHT_B_PIN, 0);
+    if (dist_measured) {
+      ldrive = (255.0-lmin)*(u/100.0) + lmin;
+      analogWrite(LEFT_F_PIN,  ldrive);
+      analogWrite(RIGHT_F_PIN,  ldrive*0.5);
+      // analogWrite(LEFT_F_PIN, 0);
+      // analogWrite(RIGHT_F_PIN, 0);
+      analogWrite(LEFT_B_PIN, 0);
+      analogWrite(RIGHT_B_PIN, 0);
+    }
   }
   if (record) {
     Log();
   }
+  delay(1);
 }
 
 void

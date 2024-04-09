@@ -213,6 +213,21 @@
                     </div>
                 </div>
                 <div class="col-lg-4 col-sm-6 mb-4">
+                    <!-- Portfolio item 8-->
+                    <div class="portfolio-item">
+                        <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal8">
+                            <div class="portfolio-hover">
+                                <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
+                            </div>
+                            <img class="img-fluid" src="assets/img/portfolio/lab8/lab8.png" alt="..." />
+                        </a>
+                        <div class="portfolio-caption">
+                            <div class="portfolio-caption-heading">Lab 8: Stunting</div>
+                            <div class="portfolio-caption-subheading text-muted">Trying to drift</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-6 mb-4">
                     <!-- Portfolio item TBD-->
                     <div class="portfolio-item">
                         <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModalTBD">
@@ -1008,6 +1023,55 @@
                                     </p>
                                     <img class="col-lg-5" src="assets/img/portfolio/lab7/Screenshot 2024-03-26 at 3.45.23 AM.png" alt="..."/>
                                     <img class="col-lg-5" src="assets/img/portfolio/lab7/Screenshot 2024-03-26 at 3.46.16 AM.png" alt="..."/>
+                                </div>
+                                <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
+                                    type="button">
+                                    <i class="fas fa-xmark me-1"></i>
+                                    Close Project
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Portfolio item 8 modal popup-->
+    <div class="portfolio-modal modal fade" id="portfolioModal8" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="close-modal" data-bs-dismiss="modal"><img src="assets/img/close-icon.svg"
+                        alt="Close modal" /></div>
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="modal-body">
+                                <!-- Project details-->
+                                <h1 class="text-decoration-underline">Lab 8: Stunting</h1>
+                                <div class="text-start">
+                                    <h2 class="text-center">Drifting</h2>
+                                    <p>
+                                        I chose to Implement the stunt by appending the two P controllers I made in the previous labs. To make them
+                                        work together I had the distance controller run first and, once in the desired range, stop itself and start the 
+                                        orientation controller by setting the icm flag. The commented out if clauses are from the original distance controller.
+                                        Since I no longer need to settle at a distance, the behavior for overshooting was no longer necessary. I similarly 
+                                        changed the end behavior of the orientation controller so that it would drive back towards the start position for  
+                                        1.5 seconds once it completed its turn instead of just turning.
+                                    </p>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab8/Screenshot 2024-04-09 at 12.17.37 AM.png" alt="..."/>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab8/Screenshot 2024-04-09 at 1.17.36 AM.png" alt="..."/>
+
+                                    <p>
+                                        Below are the videos of the code running successfully andthe data gathered from them. I was struggling to 
+                                        get the robot to do a smooth drift and drive and settled on the behavior where it drifts into orienting, then drives.
+                                    </p>
+                                    <iframe class="col-lg-5" src="https://youtube.com/embed/vCeBJ4F2nXo" frameborder="0"></iframe>
+                                    <img class="col-lg-6" src="assets/img/portfolio/lab8/Run1.png" alt="..."/>
+                                    <iframe class="col-lg-5" src="https://youtube.com/embed/Zs_pGGvZNHE" frameborder="0"></iframe>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab8/Run2.png" alt="..."/>
+                                    <iframe class="col-lg-6" src="https://youtube.com/embed/dm7LqlI5k70" frameborder="0"></iframe>
+                                    <img class="col-lg-4" src="assets/img/portfolio/lab8/Run3.png" alt="..."/>
+                                    <!-- Run1: vCeBJ4F2nXo, Run2: , Run3: dm7LqlI5k70 -->
                                 </div>
                                 <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
                                     type="button">
