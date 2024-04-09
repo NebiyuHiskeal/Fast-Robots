@@ -1049,7 +1049,7 @@
                                 <!-- Project details-->
                                 <h1 class="text-decoration-underline">Lab 8: Stunting</h1>
                                 <div class="text-start">
-                                    <h2 class="text-center">Drifting</h2>
+                                    <h2 class="text-center">Design</h2>
                                     <p>
                                         I chose to Implement the stunt by appending the two P controllers I made in the previous labs. To make them
                                         work together I had the distance controller run first and, once in the desired range, stop itself and start the 
@@ -1060,7 +1060,15 @@
                                     </p>
                                     <img class="col-lg-5" src="assets/img/portfolio/lab8/Screenshot 2024-04-09 at 12.17.37 AM.png" alt="..."/>
                                     <img class="col-lg-5" src="assets/img/portfolio/lab8/Screenshot 2024-04-09 at 1.17.36 AM.png" alt="..."/>
-
+                                    <p>
+                                        This is the design that I ultimately went with, but I started encountering issues that hadn't been fully resolved
+                                        during the distance control lab. My distance readings would semi-randomly spike into the millions or negative millions
+                                        which made the control logic difficult. I came to find, after much difficulty, that the issue was with my extrapolation.
+                                        It appears that my calculation for dt when deriving the slope was sometimes causing the slope to become infinite because of
+                                        the speed of the loop. I am still not entirely sure why this occurred so sporadically, but to resolve this I added a 1ms delay
+                                        after each run of the distance controller.
+                                    </p>
+                                    <h2 class="text-center">Drifting</h2>
                                     <p>
                                         Below are the videos of the code running successfully andthe data gathered from them. I was struggling to 
                                         get the robot to do a smooth drift and drive and settled on the behavior where it drifts into orienting, then drives.
