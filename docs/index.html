@@ -228,6 +228,21 @@
                     </div>
                 </div>
                 <div class="col-lg-4 col-sm-6 mb-4">
+                    <!-- Portfolio item 9-->
+                    <div class="portfolio-item">
+                        <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal9">
+                            <div class="portfolio-hover">
+                                <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
+                            </div>
+                            <img class="img-fluid" src="assets/img/portfolio/lab9/lab9.png" alt="..." />
+                        </a>
+                        <div class="portfolio-caption">
+                            <div class="portfolio-caption-heading">Lab 9: Mapping</div>
+                            <div class="portfolio-caption-subheading text-muted">Learing where I am</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-6 mb-4">
                     <!-- Portfolio item TBD-->
                     <div class="portfolio-item">
                         <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModalTBD">
@@ -1080,6 +1095,74 @@
                                     <iframe class="col-lg-6" src="https://youtube.com/embed/dm7LqlI5k70" frameborder="0"></iframe>
                                     <img class="col-lg-4" src="assets/img/portfolio/lab8/Run3.png" alt="..."/>
                                     <!-- Run1: vCeBJ4F2nXo, Run2: , Run3: dm7LqlI5k70 -->
+                                </div>
+                                <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
+                                    type="button">
+                                    <i class="fas fa-xmark me-1"></i>
+                                    Close Project
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Portfolio item 9 modal popup-->
+    <div class="portfolio-modal modal fade" id="portfolioModal9" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="close-modal" data-bs-dismiss="modal"><img src="assets/img/close-icon.svg"
+                        alt="Close modal" /></div>
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="modal-body">
+                                <!-- Project details-->
+                                <h1 class="text-decoration-underline">Lab 9: Mappings</h1>
+                                <div class="text-start">
+                                    <h2 class="text-center">Prelab</h2>
+                                    <p>
+                                        I chose to tackle this lab using the P controller built in the previous labs. The only modification
+                                        that I made to the controller was what it's terminating conditions were. I had it attempt to take a reading
+                                        at every angle and every time it reached a goal state it would pause until it gathered a measurement before 
+                                        moving to the next one. The controller stopped when the angle calculations surpasses 370, I start the goal 
+                                        at 0 and increment by 25, so there are always at least 14 measurements. I did two spinning readings in each
+                                        location. Below you can see the changes to the goal state.
+                                    </p>
+                                    <img src="assets/img/portfolio/lab9/code.png" alt="..."/>
+                                    <iframe width="560" height="315" src="https://youtube.com/embed/VYpe2kqarfQ" frameborder="0"></iframe>
+                                    <p>
+                                        As you can see from the video it does mostly spin in place, and makes almost an exactly 360º turn.
+                                        Becuase of that I believe it is very safe to approximate measurements for the robot staying still. As can 
+                                        be seen in the code above I changed my goal by -25, I chose to do this because my motors spin better in 
+                                        that direction, but it since numpy's to radians method handles negatives, it did not alter my transform
+                                        matrices.
+                                    </p>
+                                    <h2 class="text-center">Executing</h2>
+                                    <p>
+                                        Above is the first spinning measurement taken for each part of the map. As is evident in some of the 
+                                        maps, sometimes when the bot overshot the angle it would take a measurement and continue sending the
+                                        wrong distance distpite the angle change. So for the translated graph I left out distance measurements
+                                        that were the same as the one before them, this mostly cleaned up the issues. 
+                                    </p>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab9/-3, -2 C.png" alt="..."/>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab9/-3 , -2 P.png" alt="..."/>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab9/0, 3 C.png" alt="..."/>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab9/0, 3 P.png" alt="..."/>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab9/5, 3 C.png" alt="..."/>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab9/5, 3 P.png" alt="..."/>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab9/5, -3 C.png" alt="..."/>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab9/5, -3 P.png" alt="..."/>
+                                    <p>
+                                        Below is the map I got with each spin, as well as where I believe the measurements indicate a wall. I chose
+                                        these places for the walls because it is where there are the most data points located at/around. The top left 
+                                        and bottom right of the area have large clusters that I don't believe are a wall because their color indicates
+                                        they were taken from the opposite side of the map, nearing the end of the sensors range, and so I belive they 
+                                        are erroneous readings.
+                                    </p>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab9/Map.png" alt="..."/>
+                                    <img class="col-lg-5" src="assets/img/portfolio/lab9/Walled.png" alt="..."/>
                                 </div>
                                 <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
                                     type="button">

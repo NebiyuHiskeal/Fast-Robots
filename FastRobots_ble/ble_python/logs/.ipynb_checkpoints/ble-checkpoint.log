@@ -1,5 +1,0 @@
-2024-01-23 16:27:56,374 | MainThread   | [DEBUG   ] | <module>            |: debug
-2024-01-23 16:27:56,374 | MainThread   | [INFO    ] | <module>            |: info
-2024-01-23 16:27:56,375 | MainThread   | [WARNING ] | <module>            |: warning
-2024-01-23 16:27:56,376 | MainThread   | [ERROR   ] | <module>            |: error
-2024-01-23 16:27:56,377 | MainThread   | [CRITICAL] | <module>            |: critical
