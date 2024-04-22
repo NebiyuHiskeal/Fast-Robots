@@ -238,6 +238,21 @@
                         </a>
                         <div class="portfolio-caption">
                             <div class="portfolio-caption-heading">Lab 9: Mapping</div>
+                            <div class="portfolio-caption-subheading text-muted">Learing where things are</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-6 mb-4">
+                    <!-- Portfolio item 10-->
+                    <div class="portfolio-item">
+                        <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal10">
+                            <div class="portfolio-hover">
+                                <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
+                            </div>
+                            <img class="img-fluid" src="assets/img/portfolio/lab10/lab10.png" alt="..." />
+                        </a>
+                        <div class="portfolio-caption">
+                            <div class="portfolio-caption-heading">Lab 10: Localization</div>
                             <div class="portfolio-caption-subheading text-muted">Learing where I am</div>
                         </div>
                     </div>
@@ -1163,6 +1178,78 @@
                                     </p>
                                     <img class="col-lg-5" src="assets/img/portfolio/lab9/Map.png" alt="..."/>
                                     <img class="col-lg-5" src="assets/img/portfolio/lab9/Walled.png" alt="..."/>
+                                </div>
+                                <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
+                                    type="button">
+                                    <i class="fas fa-xmark me-1"></i>
+                                    Close Project
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Portfolio item 10 modal popup-->
+    <div class="portfolio-modal modal fade" id="portfolioModal10" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="close-modal" data-bs-dismiss="modal"><img src="assets/img/close-icon.svg"
+                        alt="Close modal" /></div>
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="modal-body">
+                                <!-- Project details-->
+                                <h1 class="text-decoration-underline">Lab 10: Localization</h1>
+                                <div class="text-start">
+                                    <h2 class="text-center">Prelab</h2>
+                                    <p>
+                                        This lab had us simulate using a Bayes filter to accomplish grid localization. To make 
+                                        this possible we defined the map to a 3D space of size (12, 9, 18) representing x, y, and theta 
+                                        respectively. We used an odometry model to provide transition probabilities.
+                                    </p>
+                                    <h2 class="text-center">Executing</h2>
+                                    <h3>compute_control</h3>
+                                    <p>
+                                        To find the probability of getting to a new state, we must first calculate what moves were necessary 
+                                        to get to the new position.
+                                    </p>
+                                    <img class="col-lg-12" src="assets/img/portfolio/lab10/Screenshot 2024-04-22 at 12.05.35 PM.png" alt="..."/>
+                                    <h3>odom_motion_model</h3>
+                                    <p>
+                                        This function computes the probability that you took the estimated action, u, by assuming a 
+                                        gaussian distribution around the action calculated in the previous function.
+                                    </p>
+                                    <img class="col-lg-12" src="assets/img/portfolio/lab10/Screenshot 2024-04-22 at 1.03.40 PM.png" alt="..."/>
+                                    <h3>prediction_step</h3>
+                                    <p>
+                                        In this function we use the previous two functions to new bel_bar values. This requires iterating
+                                        through every possible position to calculate the probability it is the prior state of each other state,
+                                        but to save some iterations, any with a probability less than .1% are skipped.
+                                    </p>
+                                    <img class="col-lg-12" src="assets/img/portfolio/lab10/Screenshot 2024-04-22 at 1.25.09 PM.png" alt="..."/>
+                                    <h3>sensor_model</h3>
+                                    <p>
+                                        This function exists separately from the next one so that the next one can be read easier. This 
+                                        provides the probability of each measurement given the true state. This is also estimated to be 
+                                        gaussian around the actual state.
+                                    </p>
+                                    <img class="col-lg-12" src="assets/img/portfolio/lab10/Screenshot 2024-04-22 at 1.31.16 PM.png" alt="..."/>
+                                    <h3>update_step</h3>
+                                    <p>
+                                        This step goes through each position in our grid and uses the bel_bar probability of each times the 
+                                        product of the probabilities calculated in the sensor_model function.
+                                    </p>
+                                    <img class="col-lg-12" src="assets/img/portfolio/lab10/Screenshot 2024-04-22 at 1.37.50 PM.png" alt="..."/>
+                                    <iframe width="560" height="315" src="https://youtube.com/embed/XLyN-Sr_cmg" frameborder="0"></iframe>
+                                    <p>
+                                        In the video you can see that the bayes filter (blue) stays pretty accurate to the true state (green)
+                                        despite having a very inaccurate odometry model (red) to work off of. It seems to work worst at the point 
+                                        where the robot changes direction. It tends to overestimate the change at least for the first movement, 
+                                        but it otherwise remains very true
+                                    </p>
                                 </div>
                                 <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
                                     type="button">
