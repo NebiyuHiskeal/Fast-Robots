@@ -253,7 +253,22 @@
                         </a>
                         <div class="portfolio-caption">
                             <div class="portfolio-caption-heading">Lab 10: Localization</div>
-                            <div class="portfolio-caption-subheading text-muted">Learing where I am</div>
+                            <div class="portfolio-caption-subheading text-muted">Practicing learing where I am</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-6 mb-4">
+                    <!-- Portfolio item 11-->
+                    <div class="portfolio-item">
+                        <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal11">
+                            <div class="portfolio-hover">
+                                <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
+                            </div>
+                            <img class="img-fluid" src="assets/img/portfolio/lab11/lab11.png" alt="..." />
+                        </a>
+                        <div class="portfolio-caption">
+                            <div class="portfolio-caption-heading">Lab 11: Localization (but real)</div>
+                            <div class="portfolio-caption-subheading text-muted">Actually learing where I am</div>
                         </div>
                     </div>
                 </div>
@@ -1250,6 +1265,54 @@
                                         where the robot changes direction. It tends to overestimate the change at least for the first movement, 
                                         but it otherwise remains very true
                                     </p>
+                                </div>
+                                <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
+                                    type="button">
+                                    <i class="fas fa-xmark me-1"></i>
+                                    Close Project
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Portfolio item 11 modal popup-->
+    <div class="portfolio-modal modal fade" id="portfolioModal11" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="close-modal" data-bs-dismiss="modal"><img src="assets/img/close-icon.svg"
+                        alt="Close modal" /></div>
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="modal-body">
+                                <!-- Project details -->
+                                <h1 class="text-decoration-underline">Lab 11: Localization (but real)</h1>
+                                <div class="text-start">
+                                    <h2 class="text-center">RealRobot</h2>
+                                    <p>
+                                        To have this class work with the code from the previous labs, I needed to make small adjustments 
+                                        to the arduino code and to the class. I added 2 fields to avoid needing a global variable and 2
+                                        functions to enable message handling. In arduino I had to change the setup and execution of my PID 
+                                        command. In previous labs I sent multiple setup commands to set the gains and motor strengths without
+                                        needing to reupload arduino code. Since the action being done is a repeated scan, I didn't need 
+                                        that functionality and could have the PID function handle all of that. Additionally, for mapping 
+                                        I had the function set up to take as many distance readings as it could in a rotation, which did not
+                                        produce a consistent number of readings, so I limited it to be one every 20º.
+                                    </p>
+                                    <img class="col-lg-6" src="assets/img/portfolio/lab11/Screenshot 2024-04-29 at 2.08.32 PM.png" alt="..."/>
+                                    <img class="col-lg-4" src="assets/img/portfolio/lab11/Screenshot 2024-04-29 at 2.06.16 PM.png" alt="..."/>
+                                    <h3>perform_observation_loop</h3>
+                                    <p>
+                                        Next, to actually do the observation I followed the handout instructions for making the function 
+                                        async. I have my robot rotating clockwise because the left motor spins weakly backwards, to counteract
+                                        that in my calculations I added 360 to each angle (since they are negative and sent in the opposite 
+                                        order they were recorded).
+                                    </p>
+                                    <img class="col-lg-8" src="assets/img/portfolio/lab11/Screenshot 2024-04-29 at 3.23.38 PM.png" alt="..."/>
+                                    <iframe width="560" height="315" src="https://youtube.com/embed/ND2BL81FeU8" frameborder="0"></iframe>
                                 </div>
                                 <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
                                     type="button">
