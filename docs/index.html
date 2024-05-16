@@ -273,6 +273,21 @@
                     </div>
                 </div>
                 <div class="col-lg-4 col-sm-6 mb-4">
+                    <!-- Portfolio item 12-->
+                    <div class="portfolio-item">
+                        <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal12">
+                            <div class="portfolio-hover">
+                                <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
+                            </div>
+                            <img class="img-fluid" src="assets/img/portfolio/lab12/lab12.png" alt="..." />
+                        </a>
+                        <div class="portfolio-caption">
+                            <div class="portfolio-caption-heading">Lab 12: Navigation</div>
+                            <div class="portfolio-caption-subheading text-muted">Going around the map</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-6 mb-4">
                     <!-- Portfolio item TBD-->
                     <div class="portfolio-item">
                         <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModalTBD">
@@ -1313,6 +1328,64 @@
                                     </p>
                                     <img class="col-lg-8" src="assets/img/portfolio/lab11/Screenshot 2024-04-29 at 3.23.38 PM.png" alt="..."/>
                                     <iframe width="560" height="315" src="https://youtube.com/embed/ND2BL81FeU8" frameborder="0"></iframe>
+                                </div>
+                                <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
+                                    type="button">
+                                    <i class="fas fa-xmark me-1"></i>
+                                    Close Project
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Portfolio item 12 modal popup-->
+    <div class="portfolio-modal modal fade" id="portfolioModal12" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="close-modal" data-bs-dismiss="modal"><img src="assets/img/close-icon.svg"
+                        alt="Close modal" /></div>
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="modal-body">
+                                <!-- Project details -->
+                                <h1 class="text-decoration-underline">Lab 12: Navigating the Map</h1>
+                                <div class="text-start">
+                                    <h2 class="text-center">The Plan</h2>
+                                    <p>
+                                        I chose to approach this lab by using the P controllers that I have made in previous labs. I was initially going 
+                                        to use localization as well, but I started to experience odd bugs with the code and decided to instead preplan a 
+                                        path using the P controllers. I recorded the path as a set of alternating distance and orientation control set 
+                                        points shown below. I modified my PID command to set goal to be an index into the list of set points.
+                                    </p>
+                                    <img class="col-lg-8" src="assets/img/portfolio/lab12/Screenshot 2024-05-15 at 10.01.00 PM.png" alt="..."/>
+                                    <p>
+                                        I initially had the controllers run until they had reached their goal and then stopped and moved to the next, but
+                                        overshooting was a really big issue with this approach. To keep that from happening I instead run each set point 
+                                        for a set amount of time, 5 seconds for distance control and 3 seconds for orientation. This mostly resolved the 
+                                        issue, but unfortunately when I got this part working my motor drivers started to fail. To check that this was 
+                                        actually the case, I tried several batteries that I fully recharged before using, and ran the P controller with a
+                                        gain of 10 (which maxes out PMW value sent to the motors) and it still failed to turn. It even someetimes fails 
+                                        to spin the wheels in the air with no friction from the ground. Due to this, the robot can only turn occasionally
+                                        and can only do distance control without assistance, but the wheels cannot generate enough torque to turn. Below 
+                                        is what the run looks like with me assisting the robot at the points where it is supposed to turn. 
+                                    </p>
+                                    <p>
+                                        The top video shows the robot mostly going along the path with me doing the turns. You can see in the first long 
+                                        run, the momentum from the forward motion carries into the turn and allows the bot to use less power to start the 
+                                        turn before losing the battle against friction. Prior to the motors giving out, I had active breaking at the end 
+                                        of distance control segments to avoid this. Aside from this it follows the planned path very accurately except for 
+                                        when I over-correct the final turn. The bottom video shows an issue I accidentally replicated that I was experiencing
+                                        while the motors were working. My TOF sensor is mounted on the front left side, so if the distance control takes 
+                                        it too far along the tile, or if the rotation does not turn right enough, the sensor would read the distance from 
+                                        the box or randomly read a scatter from the box and the far wall, which makes it stop prematurely, or over-corrects 
+                                        and goes way past the goal set point, and can't recover in the 5 seconds alloted for distance control.
+                                    </p>
+                                    <iframe width="560" height="315" src="https://youtube.com/embed/v_dI0lPhXNc" frameborder="0"></iframe>
+                                    <iframe width="560" height="315" src="https://youtube.com/embed/DeIv_Nxp91Q" frameborder="0"></iframe>
                                 </div>
                                 <button class="btn btn-primary btn-xl text-uppercase" data-bs-dismiss="modal"
                                     type="button">

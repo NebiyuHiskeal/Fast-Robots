@@ -15,19 +15,23 @@
 
 #include <Wire.h>
 #include "SparkFun_VL53L1X.h" //Click here to get the library: http://librarymanager/All#SparkFun_VL53L1X
+#include "ICM_20948.h"
 
 //Optional interrupt and shutdown pins.
 #define SHUTDOWN_PIN A2
 #define INTERRUPT_PIN 3
+#define AD0_VAL   0
 
 // SFEVL53L1X distanceSensor;
 //Uncomment the following line to use the optional shutdown and interrupt pins.
 SFEVL53L1X distanceSensor;
 SFEVL53L1X distanceSensor2(Wire, SHUTDOWN_PIN, INTERRUPT_PIN);
+ICM_20948_I2C myICM;
 
 void setup(void)
 {
   Wire.begin();
+  Wire.setClock(400000);
 
   Serial.begin(115200);
   pinMode(SHUTDOWN_PIN, OUTPUT);
@@ -57,43 +61,65 @@ void setup(void)
   }
   distanceSensor.setDistanceModeLong();
   Serial.println("Sensor 2 online!");
+  // Wire.begin();
+  bool initialized = false;
+  while( !initialized )
+  {
+    myICM.begin( Wire, AD0_VAL );
+    Serial.print( F("Initialization of the sensor returned: ") );
+    Serial.println( myICM.statusString() );
+    if( myICM.status != ICM_20948_Stat_Ok ){
+      Serial.println( "Trying again..." );
+      delay(500);
+    }else{
+      initialized = true;
+    }
+  }
 }
 
 void loop(void)
 {
-  distanceSensor.startRanging(); //Write configuration bytes to initiate measurement
-  while (!distanceSensor.checkForDataReady())
-  {
-    delay(1);
+  if (myICM.dataReady()) {
+    Serial.print("IMU Ready: ");
+    myICM.getAGMT();
+    Serial.println(myICM.gyrZ());
   }
+  else {
+    Serial.println("IMU FAIL");
+  }
+  distanceSensor.startRanging(); //Write configuration bytes to initiate measurement
+  if (distanceSensor.checkForDataReady()){
+  // {
+  //   delay(1);
+  // }
   int distance = distanceSensor.getDistance(); //Get the result of the measurement from the sensor
   distanceSensor.clearInterrupt();
   distanceSensor.stopRanging();
 
   float distanceInches= distance * 0.0393701;
   float distanceFeet = distanceInches / 12.0;
-  // Serial.print("Distance1(ft): ");
+  Serial.print("Distance1(ft): ");
   Serial.print(distanceFeet);
-  // Serial.print("ft ");
-  // Serial.print(distanceInches);
-  // Serial.print("in");
+  Serial.print("ft ");
+  Serial.print(distanceInches);
+  Serial.print("in");}
 
-  // distanceSensor2.startRanging(); //Write configuration bytes to initiate measurement
-  // while (!distanceSensor2.checkForDataReady())
+  distanceSensor2.startRanging(); //Write configuration bytes to initiate measurement
+  if (distanceSensor2.checkForDataReady()){
   // {
   //   delay(1);
   // }
-  // float distance2 = distanceSensor2.getDistance(); //Get the result of the measurement from the sensor
-  // distanceSensor2.clearInterrupt();
-  // distanceSensor2.stopRanging();
+  float distance2 = distanceSensor2.getDistance(); //Get the result of the measurement from the sensor
+  distanceSensor2.clearInterrupt();
+  distanceSensor2.stopRanging();
 
-  // float distanceInches2= distance2 * 0.0393701;
-  // float distanceFeet2 = distanceInches2 / 12.0;
-  // Serial.print("\tDistance2(ft): ");
-  // Serial.print(distanceFeet2);
-  // Serial.print("ft ");
-  // Serial.print(distanceInches2);
-  // Serial.print("in");
+  float distanceInches2= distance2 * 0.0393701;
+  float distanceFeet2 = distanceInches2 / 12.0;
+  Serial.print("\tDistance2(ft): ");
+  Serial.print(distanceFeet2);
+  Serial.print("ft ");
+  Serial.print(distanceInches2);
+  Serial.print("in");}
 
   Serial.println();
 }
